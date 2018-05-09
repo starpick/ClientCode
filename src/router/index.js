@@ -6,6 +6,7 @@ import UploadPage from '@/components/UploadPage'
 import UploadFromAlbum from '@/components/UploadFromAlbum'
 import UploadFromCam from '@/components/UploadFromCam'
 import UploadInfo from '@/components/UploadInfo'
+import UploadShare from '@/components/UploadShare'
 import $ from 'jquery'
 Vue.use(Router)
 
@@ -39,6 +40,11 @@ export default new Router({
       path: '/upload/info',
       name: 'UploadInfo',
       component: UploadInfo
+
+    }, {
+      path: '/upload/share',
+      name: 'UploadShare',
+      component: UploadShare
 
     }
   ]
