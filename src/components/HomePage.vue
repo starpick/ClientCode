@@ -4,11 +4,11 @@
       
        <ul>
             <li>
-                <img id="logo-img" src="../assets/logo.png"></img>
+                <img id="logo-img" src="/static/logo.png"></img>
            </li>
            <li>
                <div>
-            <img  id="search-icon" src="../assets/search.png"></img>               
+            <img  id="search-icon" src="/static/search.png"></img>               
                    
                </div>
            </li>
@@ -21,33 +21,46 @@
 
         </ul>
       </header>
-      <div id="feed-container" v-for="feed in feeds">
-        <div id="info-container">
-          <div id="avatar"></div>
-            <div id="username">{{feed.username}}</div>
+      <div class="feed-container" v-for="(feed, index) in feeds">
+        <div class="info-container">
+          <div class="avatar"></div>
+            <div class="username">{{feed.Username}}</div>
           </div>
           <div class="img-container">
-              <img src="../assets/logo.png"></img>
-            <div id="icon-container">
+              <img :src="feed.PicturePath"></img>
+            <div class="icon-container">
               <ul>
-                <li class="left-li">heart </li>
-                <li class="left-li">cmts </li> 
+                <li class="left-li  " @click="onPick(feed.UploadEntryID)"> 
+                  <span  :class="{pick:true, ispick:isPicked(feed.UploadEntryID)}">  </span> 
+                  </li>
+                <li class="left-li  " @click="onDiss(feed.UploadEntryID)">  
+                  <span   :class="{diss:true, isdiss:isDissed(feed.UploadEntryID)}"> </span> 
+                  </li> 
                 <li class="empty-li">  </li> 
-                <li class="right-li">bookmark </li> 
+                <li class="right-li">{{feed.isBookmark}} </li> 
                 </ul>
               </div>
           </div>
-          <div id="social-container">
-            <div id="social-counter">
-              <div>pick:<span id="pick-cnt">{{feed.picks}}</span></div>
-              <div>comments:
-                  <span id="cmt-cnt">{{feed.comments.length}}</span>
+          <div class="social-container">
+            <div class="description-container">
+              <span class="description-user">{{feed.Username}}</span>{{feed.Description}}
+              <span v-for="tag in feed.Tags" class="tag-span">#{{tag}}</span>
+            </div>
+            <div class="social-counter">
+              <div>
+                <span class="pick-icon"></span>
+              <span class="cnt">{{feed.Pick}}</span>
+              </div>
+              <div>
+                <span class="comment-icon"> </span>
+                  <span class="cnt">{{feed.Comments.length}}</span>
               </div>
               </div>
-                <div id="comments-container">
+                <div class="comments-container">
                     <ul>
-                        <li v-for="cmt in feed.comments" class="cmts">
-                       <span>{{cmt.user}}</span> {{cmt.text}}
+                        <li v-for="cmt in feed.Comments" class="cmts">
+                       <span>{{cmt.User}}</span> {{cmt.Content}} 
+                       <span class="timestamp">{{cmt.Timestamp}}</span>
                         </li>
                     </ul>
                 </div>
@@ -63,35 +76,135 @@ export default {
   name: "HomePage",
   data() {
     return {
-        feeds: [{
-            username: "StarPick CEO",
-            picks:103,
-            comments:[
-                {
-                    user:"水军1",
-                    text:"系分作业"
-                },{
-
-                    user:"水军2",
-                    text:"为什么这么麻烦"
-                } 
-            ],
-            isBookmark: true
-        }]
+      feeds: [
+        {
+          UploadEntryID: "1",
+          Username: "ilovewendy",
+          PicturePath: "/static/photo_1.png",
+          PickEntries: [
+            {
+              Brand: "Monts",
+              IdolName: "Wendy",
+              Price: "₩78,000",
+              OfficialLink: "",
+              EntryName: "dot blouse",
+              Size: "",
+              Category: "上衣",
+              TagPos: {
+                top: 30,
+                left: 40
+              }
+            },
+            {
+              Brand: "Maje",
+              IdolName: "Wendy",
+              Price: "$225",
+              OfficialLink: "",
+              EntryName: "embroidered skirt",
+              Size: "",
+              Category: "下装",
+              TagPos: {
+                top: 60,
+                left: 40
+              }
+            }
+          ],
+          Pick: 103,
+          Description: "Wendy's look is gooooooooood",
+          Tags: ["Wendy", "Monts", "Maje"],
+          Comments: [
+            {
+              User: "redvelvetfoever",
+              Content: "she's beautiful!!!",
+              TimeStamp: "2018-05-14"
+            },
+            {
+              User: "cutewendy",
+              Content: "日常画报Wendy",
+              TimeStamp: "2018-05-11"
+            }
+          ],
+          isBookmark: true
+        },
+        {
+          UploadEntryID: "0",
+          Username: "StarPick CEO",
+          PicturePath: "/static/ceo.png",
+          PickEntries: [
+            {
+              Brand: "Original",
+              IdolName: "StarPick CEO",
+              Price: "$199",
+              OfficialLink: "",
+              EntryName: "T-shirt",
+              Size: "",
+              Category: "上衣",
+              TagPos: {
+                top: 30,
+                left: 40
+              }
+            }
+          ],
+          Pick: 103,
+          Description: "StarPick: Let's pick your star!",
+          Tags: ["CEO", "Original", "T-shirt"],
+          Comments: [
+            {
+              User: "水军1",
+              Content: "CEO你真棒！",
+              TimeStamp: "2018-05-14"
+            },
+            {
+              User: "水军2",
+              Content: "永远支持starpick！",
+              TimeStamp: "2018-05-14"
+            }
+          ],
+          isBookmark: true
+        }
+      ],
+      UserInfo: {
+        UserPick: [],
+        UserDiss: []
+      }
     };
   },
   methods: {
-      onUploadClick(){
-            this.$router.push({path:"/upload"});
-                    
+    onUploadClick() {
+      this.$router.push({ path: "/upload" });
+    },
+    onPick(id) {
+      // console.log(id)
+      var inpick = this.UserInfo.UserDiss.indexOf(id);
+      if (inpick != -1) {
+        this.UserInfo.UserDiss.splice(inpick, 1);
       }
+      if (this.UserInfo.UserPick.indexOf(id) == -1) {
+        this.UserInfo.UserPick.push(id);
+      }
+    },
+    onDiss(id) {
+      var inpick = this.UserInfo.UserPick.indexOf(id);
+      if (inpick != -1) {
+        this.UserInfo.UserPick.splice(inpick, 1);
+      }
+      if (this.UserInfo.UserDiss.indexOf(id) == -1) {
+        this.UserInfo.UserDiss.push(id);
+      }
+    },
+    isPicked(id){
+      return this.UserInfo.UserPick.indexOf(id) != -1;
+    },
+    isDissed(id){
+       return this.UserInfo.UserDiss.indexOf(id) != -1;
+    }
   }
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#home-container {
+.home-container {
   width: 100%;
   height: 100%;
 }
@@ -99,9 +212,9 @@ div,
 li {
   border: 1px dashed lightgray;
 }
-#icon-container ul,
-#social-counter,
-#info-container,
+.icon-container ul,
+.social-counter,
+.info-container,
 header {
   /* to control the same padding-left. */
   padding-left: 2%;
@@ -120,14 +233,12 @@ header ul {
   width: 100%;
   max-width: 50px;
 }
-header li{
+header li {
   display: flex;
-  width:100%;
-    
+  width: 100%;
 }
-header li div{
+header li div {
   margin: auto;
-    
 }
 #search-bar {
   flex: 2;
@@ -135,13 +246,13 @@ header li div{
   text-align: center;
   /* padding:0 5%; */
 }
-#search-icon { 
-  flex: 0.5; 
+#search-icon {
+  flex: 0.5;
   margin: auto;
-  width:100%;
+  width: 100%;
 }
 #search-icon img {
-  height:  30%;
+  height: 30%;
   width: 30%;
 }
 #search-bar input {
@@ -155,35 +266,66 @@ li {
   display: inline;
   list-style: none;
 }
-#info-container div {
+.info-container div {
   display: inline;
 }
-#info-container {
+.info-container {
   text-align: left;
   padding-top: 20px;
   padding-bottom: 20px;
 }
-#avatar {
+.avatar {
   width: 0px;
   height: 0px;
   padding: 10px 18px;
   border-radius: 50px;
   background-color: lightcyan;
 }
-#username {
+.username {
   padding: 5px;
   margin-left: 8px;
 }
-
-#icon-container ul {
+.description-container {
+  padding: 10px 20px;
+  text-align: left;
+}
+.description-user {
+  font-weight: bold;
+  margin-right: 8px;
+}
+.tag-span {
+  margin-left: 3px;
+}
+.tag-span:hover {
+  text-decoration: underline;
+}
+.icon-container ul {
   margin: 0;
   display: flex;
   justify-content: space-between;
-  text-align: left;
+  text-align: center;
 }
-#icon-container ul li {
-  padding-top: 4px;
-  padding-bottom: 4px;
+.pick {
+  border: 1px solid lightgrey;
+  background-color: white;
+  padding: 0px 8px;
+  border-radius: 10px;
+}
+.ispick {
+  border: none;
+  background-color: rgb(255, 0, 128) ;
+}
+.diss {
+  background-color: lightgrey;
+  border-radius: 10px;
+  padding: 0px 8px;
+}
+.isdiss {
+  border: none;
+  background-color: grey;
+}
+.icon-container ul li {
+  padding: 4px;
 }
 .empty-li {
   flex: 4;
@@ -191,21 +333,41 @@ li {
 .left-li {
   flex: 1;
 }
-#social-counter {
+.social-counter {
   text-align: left;
 }
-#social-counter div {
+.social-counter div {
   display: inline;
   margin-left: 0;
 }
-#comments-container ul{
-    text-align: left;
-    font-size: 12px;
+.comments-container ul {
+  text-align: left;
+  font-size: 12px;
 }
-#comments-container ul span{
-    font-weight: bold;
+.comments-container ul span {
+  font-weight: bold;
 }
-#comments-container li{
-    display:block;
+.comments-container li {
+  display: block;
+}
+.img-container {
+  overflow: hidden;
+}
+.img-container img {
+  height: 100%;
+  max-height: 400px;
+}
+.cnt{
+  padding:5px;
+}
+.pick-icon{
+  background-image:url("/static/heart.png");
+  background-size: 5px;
+  
+}
+.comment-icon{
+  background-image:url("/static/comment.png");
+  background-size: 5px;
+
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div id="main-container">
     <div id="img-container">
-      <img src="../assets/logo.png"> </img>
+      <img src="/static/logo.png"> </img>
     </div>
     <h1>{{ msg }}</h1>
 <!-- v-show = "isShowRegisterForm || isShowLoginForm" -->

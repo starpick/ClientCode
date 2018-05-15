@@ -21,8 +21,8 @@
                 <div id= "photo-inner-container">
 
 
-                <img src="../assets/photo_1.png" > </img>
-                <a class="tag" v-for="t in tags" draggable="true"   
+                <img src="/static/photo_1.png" > </img>
+                <a class="tag" v-for="t in itemtags" draggable="true"   
                 @dragend="onDragingEnd" 
                 @touchmove="onTouchMove" 
                 @touchend="onTouchEnd"
@@ -80,8 +80,20 @@
                     </li>
                 </ul>
             </div>
-            <div v-show="!isEditTags">
-                descriptions
+            <div id="des-container" v-show="!isEditTags">
+                
+                <div id="text-container">
+                  <textarea 
+                  v-bind:placeholder="hint" >  </textarea>
+                </div>
+                <div id="tag-container">
+                  <ul id="tag-list" @click="onAddCustomTag()">
+                    <li v-for="i in idolNames">#{{i}}</li> 
+                    <li v-for="t in tags">#{{t}}</li> 
+                    <li> + </li>
+                  </ul>
+
+                </div>
             </div>
         </div>
 
@@ -95,8 +107,11 @@ import $ from "jquery";
 export default {
   data() {
     return {
-      isEditTags: true,
+      hint:"点评一下TA的搭配吧！",
+      editingtag:"NewTag",
+      isEditTags: !true,
       chosenTabIndex: 1,
+      customTags:[],
       picks: [
         {
           Brand: "Monts",
@@ -132,7 +147,7 @@ export default {
     };
   },
   computed: {
-    tags: function() {
+    itemtags: function() {
       var t = [];
       this.picks.forEach(e => {
         t.push({
@@ -141,9 +156,30 @@ export default {
         });
       });
       return t;
+    },
+    idolNames: function() {
+      var t = [],
+        hash = {};
+      this.picks.forEach(e => {
+        if (!hash[e]) {
+          t.push(e.IdolName);
+          hash[e] = true;
+        }
+      });
+      return t;
+    },
+    tags: function(){
+      var t = [];
+      this.itemtags.forEach(e=>{
+        t.push(e.Brand);
+      })
+      return t.concat(this.customTags);
     }
   },
   methods: {
+    onAddCustomTag(){
+      this.customTags.push(this.editingtag);
+    },
     onClickTabHead(i) {
       this.chosenTabIndex = i;
     },
@@ -184,7 +220,7 @@ export default {
       src.style.top = y * 1.0 / this.tagorigin.h * 100 + "%";
       src.style.left = x * 1.0 / this.tagorigin.w * 100 + "%";
       //   console.log(src.style.top);
-    //   console.log(y, this.tagorigin.h, this.tagorigin.y);
+      //   console.log(y, this.tagorigin.h, this.tagorigin.y);
       this.onTouchEnd(e);
     },
     onTouchMove(e) {
@@ -200,7 +236,7 @@ export default {
       //   console.log(e.touches[0])
       var x = e.touches[0].clientX - this.tagorigin.x - diffX;
       var y = e.touches[0].clientY - this.tagorigin.y - diffY;
-      src.style.top = y * 1.0 / this.tagorigin.h * 100 + "%"; 
+      src.style.top = y * 1.0 / this.tagorigin.h * 100 + "%";
       src.style.left = x * 1.0 / this.tagorigin.w * 100 + "%";
     },
     onTouchEnd(e) {
@@ -233,8 +269,8 @@ export default {
     // console.log( nodes);
     const self = this;
     nodes.forEach((e, i) => {
-      var strtop = self.tags[i].TagPos.top + "%";
-      var strleft = self.tags[i].TagPos.left + "%";
+      var strtop = self.itemtags[i].TagPos.top + "%";
+      var strleft = self.itemtags[i].TagPos.left + "%";
       var str = ["top:", strtop, ";left:", strleft, ";"];
       e.setAttribute("style", str.join(""));
       // e.style.top= self.tags[i].TagPos.top + "px";
@@ -379,5 +415,29 @@ header {
   border: none;
   padding: 0px 10px;
   height: auto;
+}
+#des-container{
+  height:100%; 
+}
+#text-container {
+  height:30%; 
+
+}
+#text-container textarea{
+  padding:8px;
+  height: 87%;
+  vertical-align: top;
+  line-height: 14px;
+}
+#tag-container ul {
+  padding:8px;
+  margin-top:30px;
+  text-align:left;
+}
+#tag-container ul li{
+  margin-right:8px;
+  margin-bottom:8px;
+  background-color:lightcyan;
+  padding:5px;
 }
 </style>
