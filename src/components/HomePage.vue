@@ -28,6 +28,10 @@
           </div>
           <div class="img-container">
               <img :src="feed.PicturePath"></img>
+              <a class="tag" v-for="t in feed.PickEntries" 
+              :style="{top: t.TagPos.top + '%', left: t.TagPos.left + '%'}"
+              @click="onClickTag(t)"
+                > <span >{{t.Brand}} </span></a>
             <div class="icon-container">
               <ul>
                 <li class="left-li  " @click="onPick(feed.UploadEntryID)"> 
@@ -48,11 +52,11 @@
             </div>
             <div class="social-counter">
               <div>
-                <span class="pick-icon"></span>
+                <span class="pick-icon"> <span style="visibility: hidden;"> ___</span></span>
               <span class="cnt">{{feed.Pick}}</span>
               </div>
               <div>
-                <span class="comment-icon"> </span>
+                <span class="comment-icon"> <span style="visibility: hidden;">___</span> </span>
                   <span class="cnt">{{feed.Comments.length}}</span>
               </div>
               </div>
@@ -60,7 +64,7 @@
                     <ul>
                         <li v-for="cmt in feed.Comments" class="cmts">
                        <span>{{cmt.User}}</span> {{cmt.Content}} 
-                       <span class="timestamp">{{cmt.Timestamp}}</span>
+                       <span class="timestamp">{{cmt.TimeStamp}}</span>
                         </li>
                     </ul>
                 </div>
@@ -83,6 +87,7 @@ export default {
           PicturePath: "/static/photo_1.png",
           PickEntries: [
             {
+              PickEntryID:"wendy01",
               Brand: "Monts",
               IdolName: "Wendy",
               Price: "₩78,000",
@@ -96,6 +101,7 @@ export default {
               }
             },
             {
+              PickEntryID:"wendy02",
               Brand: "Maje",
               IdolName: "Wendy",
               Price: "$225",
@@ -109,7 +115,7 @@ export default {
               }
             }
           ],
-          Pick: 103,
+          Pick: 43103,
           Description: "Wendy's look is gooooooooood",
           Tags: ["Wendy", "Monts", "Maje"],
           Comments: [
@@ -132,6 +138,7 @@ export default {
           PicturePath: "/static/ceo.png",
           PickEntries: [
             {
+              PickEntryID:"starpick01",
               Brand: "Original",
               IdolName: "StarPick CEO",
               Price: "$199",
@@ -170,6 +177,10 @@ export default {
     };
   },
   methods: {
+    onClickTag(pickentry){
+      this.$router.push({ path: "/pickentry/:pickentry", 
+      params:{pickentryid: pickentry.PickEntryID}});
+    },
     onUploadClick() {
       this.$router.push({ path: "/upload" });
     },
@@ -192,11 +203,11 @@ export default {
         this.UserInfo.UserDiss.push(id);
       }
     },
-    isPicked(id){
+    isPicked(id) {
       return this.UserInfo.UserPick.indexOf(id) != -1;
     },
-    isDissed(id){
-       return this.UserInfo.UserDiss.indexOf(id) != -1;
+    isDissed(id) {
+      return this.UserInfo.UserDiss.indexOf(id) != -1;
     }
   }
 };
@@ -210,7 +221,10 @@ export default {
 }
 div,
 li {
-  border: 1px dashed lightgray;
+  /* border: 1px dashed lightgray; */
+}
+header {
+  background-color: darkturquoise;
 }
 .icon-container ul,
 .social-counter,
@@ -313,7 +327,7 @@ li {
 }
 .ispick {
   border: none;
-  background-color: rgb(255, 0, 128) ;
+  background-color: rgb(255, 0, 128);
 }
 .diss {
   background-color: lightgrey;
@@ -341,6 +355,7 @@ li {
   margin-left: 0;
 }
 .comments-container ul {
+  padding-left:8%;
   text-align: left;
   font-size: 12px;
 }
@@ -352,22 +367,51 @@ li {
 }
 .img-container {
   overflow: hidden;
+  position: relative;
 }
 .img-container img {
   height: 100%;
   max-height: 400px;
 }
-.cnt{
-  padding:5px;
+.cnt {
+  /* padding: 5px; */
+  width: 20px;
+  height: 20px;
 }
-.pick-icon{
-  background-image:url("/static/heart.png");
-  background-size: 5px;
-  
+.pick-icon {
+  width:20px;
+  background-image: url(/static/pick.png);
+  background-size: 28px 28px;
+  background-repeat: no-repeat;
+  background-position: -3px -5px;
 }
-.comment-icon{
-  background-image:url("/static/comment.png");
-  background-size: 5px;
+.comment-icon {
+  width:20px;
+  background-image: url(/static/comment.png);
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+} 
 
+.tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: lightcyan;
+  opacity: 0.7;
+  padding: 5px;
+  border-radius: 10px;
+  border-top-right-radius: 0px;
+}
+.tag span {
+  opacity: 1;
+  font-size: 10px;
+}
+.social-counter div{
+  margin-left: 10px;
+}
+.timestamp{
+  color:lightgray;
+  margin-left:10px;
+  font-style: italic;
 }
 </style>

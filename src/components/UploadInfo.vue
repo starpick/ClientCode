@@ -43,40 +43,23 @@
                     >{{pick.Category}} </li>
                     <li id="add-item" v-on:click="onAddItem()">+ 新增</li>
                 </ul>
+                    <div id="tab-image"> 
+                    <img :src="activeImageSrc" ></img>
+                    <div id="upload-pick-image">上传item照片</div>
+                    </div>
                 <ul id="tab-body-ul">
                     <li v-for="(pick,index) in picks"
                     v-bind:class="{tabActive:chosenTabIndex == index}" 
                     v-show="index == chosenTabIndex"
-                    >
-                    <div>
-                        <span class="field-title">  类型</span>{{pick.Category}}
-                        </div>
-                        <div>
-                        <span class="field-title">  爱豆</span>{{pick.IdolName}}
-                        </div>
-                        <div>
-                        <span class="field-title" >  品牌</span>{{pick.Brand}}
-                        </div>
-                        <div>
-                        <span class="field-title">  价格</span>{{pick.Price}}
-                        </div>
-                        <div>
-                        <span class="field-title"
-                        v-bind:class="{unfilled:pick.OfficialLink.length == 0}"
-                        >  官网链接</span>{{pick.OfficialLink}}
-                        </div>
-                        <div>
-                        <span class="field-title">  服装名</span>{{pick.EntryName}}
-                        </div>
-                        <div>
-                        <span class="field-title"
-                        v-bind:class="{unfilled:pick.Size.length == 0}"
-                        > 尺寸</span> {{pick.Size}}
-                        </div>
-                        <div>
-                        <span class="field-title" 
-                        > pos</span> {{pick.TagPos}}
-                        </div>
+                    > 
+                      <div v-for="(val, key) in  pick" 
+                          v-if="key !== 'TagPos' "  >  
+                          <span class="field-title"
+                          v-bind:class="{unfilled:val.length == 0}"
+                          >{{ EntryAlias[key]}}  </span>
+                          {{val}}  
+                      </div>
+                      
                     </li>
                 </ul>
             </div>
@@ -109,13 +92,23 @@ export default {
     return {
       hint:"点评一下TA的搭配吧！",
       editingtag:"NewTag",
-      isEditTags: !true,
+      isEditTags: true,
       chosenTabIndex: 1,
       customTags:[],
+      EntryAlias: {
+        Brand: "品牌",
+        IdolName: "爱豆",
+        Price: "价格",
+        OfficialLink: "官网链接",
+        EntryName: "Item名称",
+        Size: "尺寸",
+        Category: "类别"
+      },
       picks: [
         {
           Brand: "Monts",
           IdolName: "Wendy",
+          PicturePath:"/static/shirt_1.png",
           Price: "₩78,000",
           OfficialLink: "",
           EntryName: "dot blouse",
@@ -129,6 +122,7 @@ export default {
         {
           Brand: "Maje",
           IdolName: "Wendy",
+          PicturePath:"/static/skirt_1.png",
           Price: "$225",
           OfficialLink: "",
           EntryName: "embroidered skirt",
@@ -147,6 +141,9 @@ export default {
     };
   },
   computed: {
+    activeImageSrc: function(){
+      return this.picks[this.chosenTabIndex].PicturePath;
+    },
     itemtags: function() {
       var t = [];
       this.picks.forEach(e => {
@@ -439,5 +436,18 @@ header {
   margin-bottom:8px;
   background-color:lightcyan;
   padding:5px;
+}
+#tab-image{
+  padding: 10px 0px 0px 0px;
+}
+#tab-image img{
+  width:100%;
+}
+#upload-pick-image{
+  width:100%;
+  background-color:darkturquoise;
+  color:white;
+  cursor: help;
+  padding:5px 0px;
 }
 </style>
