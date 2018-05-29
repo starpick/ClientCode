@@ -53,11 +53,25 @@
                     v-show="index == chosenTabIndex"
                     > 
                       <div v-for="(val, key) in  pick" 
-                          v-if="key !== 'TagPos' "  >  
+                          v-if="key !== 'TagPos' && key !== 'PicturePath' "   
+                          class="field-container"
+                          >  
                           <span class="field-title"
-                          v-bind:class="{unfilled:val.length == 0}"
+                          v-bind:class="{unfilled:val.length == 0 && false === pickFieldIsEdit[key]}"
                           >{{ EntryAlias[key]}}  </span>
-                          {{val}}  
+                          <span 
+                          @click="onEditPickField(key)"  
+                          >  
+                            <span v-if="false === pickFieldIsEdit[key]" >{{val}}</span> 
+                            <span v-if="val.length == 0  && false === pickFieldIsEdit[key]"
+                            v-bind:class="{unfilled:val.length == 0}"
+                            >待填写</span>
+                              <input v-if="pickFieldIsEdit[key] === true" 
+                              autofocus="autofocus" 
+                              @blur="onFinishEditPickField(key)"
+                              @keyup.esc="onCancelEditField(key)"
+                              @keyup.enter="onFinishEditPickField(key)" v-model="pickFieldBuf[key]"> </input>  
+                          </span>
                       </div>
                       
                     </li>
@@ -137,12 +151,53 @@ export default {
       tagorigin: {
         x: 0,
         y: 0
+      },
+      __defalut__pick__template__:{ // read only.
+          Brand: "",
+          IdolName: "",
+          PicturePath:"",
+          Price: "",
+          OfficialLink: "",
+          EntryName: "",
+          Size: "",
+          Category: "",
+          TagPos: {
+            top: -1,
+            left: -1
+          }
+      },
+      pickFieldIsEdit:{  
+          Brand: false,
+          IdolName: false,
+          PicturePath:false,
+          Price: false,
+          OfficialLink: false,
+          EntryName: false,
+          Size: false,
+          Category: false
+      },
+      pickFieldBuf: { // read only.
+          Brand: "",
+          IdolName: "",
+          PicturePath:"",
+          Price: "",
+          OfficialLink: "",
+          EntryName: "",
+          Size: "",
+          Category: "",
+          TagPos: {
+            top: -1,
+            left: -1
+          }
       }
     };
   },
   computed: {
+    currentPick:function(){
+      return this.picks[this.chosenTabIndex];
+    },
     activeImageSrc: function(){
-      return this.picks[this.chosenTabIndex].PicturePath;
+      return this.currentPick.PicturePath;
     },
     itemtags: function() {
       var t = [];
@@ -171,20 +226,51 @@ export default {
         t.push(e.Brand);
       })
       return t.concat(this.customTags);
+    },
+    pickEntryFieldsCount: function() {
+      return Object.keys(this.__defalut__pick__template__).length;
     }
   },
   methods: {
+    //  field edit control
+    onEditPickField(key){
+      console.log("> edit pick", key)
+      this.pickFieldIsEdit[key] = true;
+      this.pickFieldBuf[key] = this.currentPick[key];
+      console.log(this.pickFieldIsEdit)
+    },
+    onFinishEditPickField(key){
+      console.log("> end edit pick", key)
+      this.pickFieldIsEdit[key] = false;
+      this.currentPick[key] = this.pickFieldBuf[key];
+
+    },
+    onCancelEditField(key){
+      this.pickFieldIsEdit[key] = false;
+      this.pickFieldBuf[key] = this.currentPick[key]; 
+    },
     onAddCustomTag(){
       this.customTags.push(this.editingtag);
     },
     onClickTabHead(i) {
       this.chosenTabIndex = i;
+      // manage edit buffer
+      for (var k in  this.pickFieldIsEdit){
+        this.pickFieldIsEdit[k] = false;
+      }
+      this.pickFieldBuf =  Object.assign({}, this.currentPick);
+      
+
     },
     onCancel() {
       this.$router.push({ path: "/home" });
     },
     onSubmit() {
       this.$router.push({ path: "/upload/share" });
+      // TODO: sumit upload_entry first, then
+      // in its callback, POST all the picks
+
+
     },
     onAddItem() {
       this.picks.push({
@@ -253,13 +339,23 @@ export default {
       });
     }
   },
+  beforeCreate(){
+
+  },
+  created(){
+
+
+  },
   mounted() {
+ 
+
+
     const ptcon = document.querySelector("#photo-container");
     this.tagorigin.h = ptcon.clientHeight;
     this.tagorigin.w = ptcon.clientWidth;
     this.tagorigin.x = ptcon.offsetLeft;
     this.tagorigin.y = ptcon.offsetTop;
-    console.log(this.tagorigin);
+    // console.log(this.tagorigin);
     /////////////////////////////
     var pickptr = 0;
     var nodes = document.querySelectorAll("#photo-inner-container a");
@@ -274,6 +370,8 @@ export default {
       // e.style.left = self.tags[i].TagPos.left + "px";
       // console.log(e.style);
     });
+
+
   }
 };
 </script>
@@ -449,5 +547,13 @@ header {
   color:white;
   cursor: help;
   padding:5px 0px;
+}
+.field-container input{
+  max-width:70px;
+  background: none;
+  border-bottom: 1px dashed darkcyan;
+  border-top:none;
+  border-left:none;
+  border-right:none;
 }
 </style>

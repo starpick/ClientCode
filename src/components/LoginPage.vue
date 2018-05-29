@@ -17,6 +17,10 @@
               <label>密码  </label> 
               <input type="password"   v-model="password"> </input>
           </div>
+          <div>
+              <label>邮箱  </label> 
+              <input type="email"   v-model="email"> </input>
+          </div>
           <button v-on:click="onSubmitRegister" id="submit-register-btn" > 提交 </button>
         </div> 
         <div v-if="isRegisterFail" class="fail-hint"> 注册失败！ </div>
@@ -32,6 +36,11 @@
           <div>
               <label>密码  </label> 
               <input type="password"   v-model="password"> </input>
+          </div>
+
+          <div>
+              <label>邮箱  </label> 
+              <input type="email"   v-model="email"> </input>
           </div>
           <button id="submit-login-btn" v-on:click="onLogin"> 登录 </button>
         </form> 
@@ -67,6 +76,7 @@ export default {
       isLoginFail: false,
       user: "",
       password: "123",
+      email:"def@def.com",
       registerAPI: "http://localhost:8000/starpick/register",
       loginAPI: "http://localhost:8000/starpick/login"
     };
@@ -117,6 +127,7 @@ export default {
       var regform = new FormData();
       regform.append("user", this.user);
       regform.append("password", this.password);
+      regform.append("email", this.email);
       console.log("on submit");
       // req.open("POST",);
       // req.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
@@ -128,8 +139,10 @@ export default {
         processData: false,
         cache: false,
         success: res => {
-          console.log("> Register Req Success:", res);
-          if (res != "register") {
+          console.log("> Register Req Success:");
+          console.log(res, res.success, res["success"])
+          var resjson = JSON.parse(res);
+          if (!resjson["success"]) {
             self.isRegisterFail = true;
             return ;
           }

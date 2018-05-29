@@ -66,6 +66,11 @@
                        <span>{{cmt.User}}</span> {{cmt.Content}} 
                        <span class="timestamp">{{cmt.TimeStamp}}</span>
                         </li>
+
+                        <li class="user-send-comment"> 
+                          <input placeholder="发表评论！" v-model="comments[index]"
+                          @keyup.enter="addComment(feed.UploadEntryID, index)"> </input> </li>
+
                     </ul>
                 </div>
           </div>
@@ -80,6 +85,7 @@ export default {
   name: "HomePage",
   data() {
     return {
+      comments:[],
       feeds: [
         {
           UploadEntryID: "1",
@@ -208,6 +214,24 @@ export default {
     },
     isDissed(id) {
       return this.UserInfo.UserDiss.indexOf(id) != -1;
+    },
+    addComment(pickentryid, i) {
+      var dt = new Date();
+      this.feeds[i].Comments.push( 
+            {
+              User: "current user",
+              Content: this.comments[i],
+              TimeStamp: dt.getYear() + '-' + dt.getMonth() + dt.getDay()
+            }
+      );
+      this.comments[i] = "";
+    }
+  
+  },
+  mounted(){
+    for (var i = 0; i < this.feeds.length; i++) {
+      this.comments.push("");
+      
     }
   }
 };
