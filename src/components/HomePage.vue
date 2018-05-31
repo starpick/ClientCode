@@ -3,21 +3,19 @@
     <header>
       
        <ul>
-            <li>
-                <img id="logo-img" src="/static/logo.png"></img>
+            <li id="logo-img-container"> 
+                  <img id="logo-img" src="/static/logo.png"></img> 
            </li>
-           <li>
-               <div>
-            <img  id="search-icon" src="/static/search.png"></img>               
-                   
-               </div>
+           <li> 
+                  <img id="search-icon" src="/static/search.png"></img>               
+                    
            </li>
              <li id="search-bar">
                 <input > </input>
             </li>
-            <li><div><button v-on:click="onUploadClick"> + </button></div> </li>
-            <li><div>icon2</div> </li>
-            <li><div>icon3</div> </li>
+            <li><div style="margin:auto;"><button id="upload-button" v-on:click="onUploadClick"> + </button></div> </li>
+            <li><div>{{$store.state.username}}</div> </li>
+            <li> <img id="logout-icon" src="/static/exit.png"></img>   </li>
 
         </ul>
       </header>
@@ -229,6 +227,7 @@ export default {
   
   },
   mounted(){
+    console.log(this.$store.state)
     for (var i = 0; i < this.feeds.length; i++) {
       this.comments.push("");
       
@@ -250,30 +249,29 @@ li {
 header {
   background-color: darkturquoise;
 }
+input:focus{
+  outline:none;
+}
 .icon-container ul,
 .social-counter,
 .info-container,
 header {
   /* to control the same padding-left. */
   padding-left: 2%;
+  padding-right:1%;
 }
 header ul {
   display: flex;
   /*     justify-content:space-between;    */
   margin: auto;
   width: 100%;
-  padding: 0px;
+  padding: 5px 0px;
   vertical-align: bottom;
-}
-#logo-img {
-  flex: 1;
-  height: 100%;
-  width: 100%;
-  max-width: 50px;
 }
 header li {
   display: flex;
   width: 100%;
+  
 }
 header li div {
   margin: auto;
@@ -282,17 +280,13 @@ header li div {
   flex: 2;
   display: flex;
   text-align: center;
+  margin-left:-8px;
   /* padding:0 5%; */
 }
 #search-icon {
-  flex: 0.5;
-  margin: auto;
-  width: 100%;
-}
-#search-icon img {
-  height: 30%;
-  width: 30%;
-}
+  /* flex: 0.5; */ 
+  max-height:50px;
+} 
 #search-bar input {
   margin: auto;
   width: auto;
@@ -437,5 +431,61 @@ li {
   color:lightgray;
   margin-left:10px;
   font-style: italic;
+}
+#upload-button{
+  position: relative;
+  vertical-align: middle;
+  background: lightcyan;
+  color:darkcyan;
+  border: none;
+  cursor:pointer;
+  border-radius: 100px;
+  padding:12% 30%;
+  overflow:hidden;
+  font-size:22px;
+}
+
+
+#upload-button:after {
+  /* 点击后的状态 */
+    content: "";
+    background: rgb(1, 252, 239);
+    display: block;
+    position: absolute;
+    padding:100px;
+    /* padding：调大小的 */
+    margin:-18px -10px;
+    /* margin: 调位置的 */
+    width:3px;
+    opacity: 0;
+    
+    transition: all 0.8s
+}
+
+#upload-button:active:after { 
+  /* 点击时的状态 */
+    padding: 0;
+    margin: 0;
+    opacity: 1;
+    width:50px;
+    transition: 0s;
+}
+
+#logo-img {
+  flex: 1;
+  height: 80%;
+  width: 100%;
+  max-width: 80%;
+  border-radius: 100px;
+
+}
+#logo-img-container{
+  /* overflow: hidden; */
+  height:80%;
+  margin: auto;
+}
+#logout-icon {
+  height:40px;
+  margin:auto;
 }
 </style>

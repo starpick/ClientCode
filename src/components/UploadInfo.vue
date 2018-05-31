@@ -5,6 +5,7 @@
  
         <button v-on:click="onSubmit()" class = "btn">提交</button>
     </header>
+ 
     <div id="info-container">
         <div id="left-container">
             <div id="right-control"> 
@@ -21,7 +22,7 @@
                 <div id= "photo-inner-container">
 
 
-                <img src="/static/photo_1.png" > </img>
+                <img :src="lookImgSrc" > </img>
                 <a class="tag" v-for="t in itemtags" draggable="true"   
                 @dragend="onDragingEnd" 
                 @touchmove="onTouchMove" 
@@ -44,8 +45,13 @@
                     <li id="add-item" v-on:click="onAddItem()">+ 新增</li>
                 </ul>
                     <div id="tab-image"> 
-                    <img :src="activeImageSrc" ></img>
-                    <div id="upload-pick-image">上传item照片</div>
+                    <img :src="currentPick.PicturePath" ></img>
+                    <div id="upload-pick-image"
+                      @click="readfile()">上传item照片
+                      <input type="file"
+                        id="item-img-upload"
+                      ></input>
+                    </div>
                     </div>
                 <ul id="tab-body-ul">
                     <li v-for="(pick,index) in picks"
@@ -104,6 +110,8 @@ import $ from "jquery";
 export default {
   data() {
     return {
+      // lookImgSrc:"/static/photo_1.png",
+      
       hint:"点评一下TA的搭配吧！",
       editingtag:"NewTag",
       isEditTags: true,
@@ -193,6 +201,9 @@ export default {
     };
   },
   computed: {
+    lookImgSrc: function() {
+      return this.$store.state.uploadedImageSrc;
+    },
     currentPick:function(){
       return this.picks[this.chosenTabIndex];
     },
@@ -337,19 +348,26 @@ export default {
           self.picks[i].TagPos.left = src.offsetLeft;
         }
       });
+    }, 
+    readfile(){
+      const self = this;
+        //得到文件对象
+      var imgFile = document.getElementById('item-img-upload').files[0];
+        console.log("> read file", imgFile)
+      //创建filereader对象
+      var fileReader = new FileReader();
+      //设置回调函数，即获取到文件路径后的操作
+      fileReader.onload = function(){ 
+            // document.getElementById('img-id').src=fileReader.result;
+            self.currentPick.PicturePath = (fileReader.result)
+            console.log(self.currentPick);
+            //读取文件
+            fileReader.readAsDataURL(imgFile);
+      };
     }
   },
-  beforeCreate(){
-
-  },
-  created(){
-
-
-  },
-  mounted() {
- 
-
-
+  
+  mounted() { 
     const ptcon = document.querySelector("#photo-container");
     this.tagorigin.h = ptcon.clientHeight;
     this.tagorigin.w = ptcon.clientWidth;
@@ -437,7 +455,7 @@ footer {
   flex: 1;
 }
 #info-container {
-  padding-top: 30px;
+  padding-top: 8px;
   display: flex;
   flex: 14;
   height: auto;
@@ -521,6 +539,7 @@ header {
 #text-container textarea{
   padding:8px;
   height: 87%;
+  width:100%;
   vertical-align: top;
   line-height: 14px;
 }
@@ -549,11 +568,58 @@ header {
   padding:5px 0px;
 }
 .field-container input{
-  max-width:70px;
+  /* max-width:70px; */
   background: none;
   border-bottom: 1px dashed darkcyan;
   border-top:none;
   border-left:none;
   border-right:none;
+}
+
+
+
+
+#upload-imgs-container ul{
+  /* padding: 2%; */
+  padding: 0;
+}
+#upload-imgs-container li{
+
+  border: 1px dashed lightgray; 
+  display: inline-block;
+  list-style: none;
+  height:100px;
+  width:100px;
+  margin:3%;
+  /* overflow: hidden; */
+}
+#upload-imgs-container li img{
+  height:100%;
+  max-width:100px;
+}
+
+#upload-imgs-container li div{
+  margin-top:5px;
+}
+#upload-imgs-container li div span{
+  padding:8px;
+  color:white;
+  background-color: darkturquoise;
+  border-radius: 100px;
+  font-size: 14px;
+}
+#upload-imgs-container li div  .first{
+  background-color: lightcoral;
+}
+
+#upload-pick-image{
+  position: relative;
+}
+
+#item-img-upload{
+  position: absolute;
+  left:0;
+  top:0;
+  opacity:0;
 }
 </style>

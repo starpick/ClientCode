@@ -23,12 +23,12 @@
           </div>
           <button v-on:click="onSubmitRegister" id="submit-register-btn" > 提交 </button>
         </div> 
-        <div v-if="isRegisterFail" class="fail-hint"> 注册失败！ </div>
+        <div v-if="isRegisterFail" class="fail-hint"> 注册失败！<div>{{RegisterFailMes}}</div> </div>
       </div>
 
       <div v-show = "isShowLoginForm" id="login-form-container" class="pop-form">
         <div id ="login-form-head" >登录</div>
-        <form class="form-body" id="login-form"> 
+        <div class="form-body" id="login-form"> 
           <div> 
               <label>用户名  </label>
               <input type="text"   v-model="user"> </input>
@@ -43,8 +43,8 @@
               <input type="email"   v-model="email"> </input>
           </div>
           <button id="submit-login-btn" v-on:click="onLogin"> 登录 </button>
-        </form> 
-        <div v-if="isLoginFail" class="fail-hint"> 登录失败！ </div>
+        </div> 
+        <div v-if="isLoginFail" class="fail-hint"> 登录失败！<div>{{LoginFailMes}} </div></div>
       </div>
 
     <div id="login-button-container">
@@ -74,6 +74,8 @@ export default {
       isShowLoginForm: false,
       isRegisterFail: false,
       isLoginFail: false,
+      LoginFailMes:"",
+      RegisterFailMes:"",
       user: "",
       password: "123",
       email:"def@def.com",
@@ -120,6 +122,44 @@ export default {
       // }
     },
     onLogin() {
+
+
+      const self = this;
+      var loginform = new FormData();
+      loginform.append("user", this.user);
+      loginform.append("password", this.password);
+      loginform.append("email", this.email);
+      console.log("> on Login");
+      // req.open("POST",);
+      // req.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+      $.ajax({
+        type: "POST",
+        url: this.loginAPI,
+        data: loginform,
+        contentType: false,
+        processData: false,
+        cache: false,
+        success: res => {
+          // console.log(res, res.success, res["success"])
+          var resjson = JSON.parse(res);
+          if (!resjson.success) {
+            self.isLoginFail = true;
+            self.LoginFailMes = resjson.error;
+            return ;
+          }
+          console.log("> Login Req Success:");          
+          self.$router.push({path:'/home'})
+          this.$store.commit('userLogin', {
+            token: resjson.token,
+            username: this.user
+          });
+          
+        },
+        error: err => {
+          console.log("> Login Req Error:", err);
+        }
+      });
+      return false;
      
     },
     onSubmitRegister() {
@@ -139,14 +179,20 @@ export default {
         processData: false,
         cache: false,
         success: res => {
-          console.log("> Register Req Success:");
-          console.log(res, res.success, res["success"])
           var resjson = JSON.parse(res);
-          if (!resjson["success"]) {
+          console.log(resjson);
+          
+          if (!resjson.success) {
             self.isRegisterFail = true;
+            self.RegisterFailMes = resjson.error;
             return ;
           }
+          console.log("> Register Req Success:");
           self.$router.push({path:'/home'})
+          this.$store.commit('userLogin', {
+            token: resjson.token,
+            username: this.user
+          });
           
         },
         error: err => {
