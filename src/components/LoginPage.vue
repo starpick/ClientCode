@@ -74,11 +74,11 @@ export default {
       isShowLoginForm: false,
       isRegisterFail: false,
       isLoginFail: false,
-      LoginFailMes:"",
-      RegisterFailMes:"",
+      LoginFailMes: "",
+      RegisterFailMes: "",
       user: "",
       password: "123",
-      email:"def@def.com",
+      email: "def@def.com",
       registerAPI: "http://localhost:8000/starpick/register",
       loginAPI: "http://localhost:8000/starpick/login"
     };
@@ -93,9 +93,8 @@ export default {
         if (!_con.is(e.target) && _con.has(e.target).length === 0) {
           // Mark 1
           self.isShowRegisterForm = false;
-          $(".cover-show").attr("class", "cover");        
+          $(".cover-show").attr("class", "cover");
           self.user = "";
-
         }
       };
       // console.log($('#cover').text());
@@ -109,9 +108,8 @@ export default {
         if (!_con.is(e.target) && _con.has(e.target).length === 0) {
           // Mark 1
           self.isShowLoginForm = false;
-          $(".cover-show").attr("class", "cover");        
+          $(".cover-show").attr("class", "cover");
           self.user = "";
-
         }
       };
       // let res =   makeLoginRequest();
@@ -122,8 +120,6 @@ export default {
       // }
     },
     onLogin() {
-
-
       const self = this;
       var loginform = new FormData();
       loginform.append("user", this.user);
@@ -145,22 +141,22 @@ export default {
           if (!resjson.success) {
             self.isLoginFail = true;
             self.LoginFailMes = resjson.error;
-            return ;
+            return;
           }
-          console.log("> Login Req Success:");          
-          self.$router.push({path:'/home'})
-          this.$store.commit('userLogin', {
+          console.log("> Login Req Success:");
+          self.$store.commit("userLogin", {
+            id: resjson.id,
+            email: this.email,
             token: resjson.token,
             username: this.user
           });
-          
+          self.$router.push({ path: "/home" });
         },
         error: err => {
           console.log("> Login Req Error:", err);
         }
       });
       return false;
-     
     },
     onSubmitRegister() {
       const self = this;
@@ -168,6 +164,7 @@ export default {
       regform.append("user", this.user);
       regform.append("password", this.password);
       regform.append("email", this.email);
+
       console.log("on submit");
       // req.open("POST",);
       // req.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
@@ -181,19 +178,20 @@ export default {
         success: res => {
           var resjson = JSON.parse(res);
           console.log(resjson);
-          
+
           if (!resjson.success) {
             self.isRegisterFail = true;
             self.RegisterFailMes = resjson.error;
-            return ;
+            return;
           }
           console.log("> Register Req Success:");
-          self.$router.push({path:'/home'})
-          this.$store.commit('userLogin', {
+          self.$router.push({ path: "/home" });
+          self.$store.commit("userLogin", {
             token: resjson.token,
+            id: resjson.id,
+            email: this.email,
             username: this.user
           });
-          
         },
         error: err => {
           console.log("> Register Req Error:", err);

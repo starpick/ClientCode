@@ -48,7 +48,7 @@ export default new Router({
       component: UploadShare
 
     }, {
-      path: '/pickentry/:pickentryid',
+      path: '/pickentry/',
       name: 'PickEntryDetail',
       component: PickEntryDetail
 

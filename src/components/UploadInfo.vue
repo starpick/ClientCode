@@ -22,6 +22,8 @@
                 <div id= "photo-inner-container">
 
 
+
+                
                 <img :src="lookImgSrc" > </img>
                 <a class="tag" v-for="t in itemtags" draggable="true"   
                 @dragend="onDragingEnd" 
@@ -35,7 +37,10 @@
                 </div>
             </div>
         </div>
-        <div id="tab-container"> 
+       
+
+    </div> 
+     <div id="tab-container"> 
             <div v-show="isEditTags">
                 <ul id="tab-head-ul">
                     <li v-for="(pick,index) in picks" 
@@ -45,13 +50,13 @@
                     <li id="add-item" v-on:click="onAddItem()">+ 新增</li>
                 </ul>
                     <div id="tab-image"> 
-                    <img :src="currentPick.PicturePath" ></img>
+                    <!-- <img :src="currentPick.PicturePath" ></img>
                     <div id="upload-pick-image"
                       @click="readfile()">上传item照片
                       <input type="file"
                         id="item-img-upload"
                       ></input>
-                    </div>
+                    </div> -->
                     </div>
                 <ul id="tab-body-ul">
                     <li v-for="(pick,index) in picks"
@@ -87,7 +92,7 @@
                 
                 <div id="text-container">
                   <textarea 
-                  v-bind:placeholder="hint" >  </textarea>
+                  v-bind:placeholder="hint" v-model="description"> BLACKPINK IN YOUR AREA! </textarea>
                 </div>
                 <div id="tag-container">
                   <ul id="tag-list" @click="onAddCustomTag()">
@@ -100,8 +105,6 @@
             </div>
         </div>
 
-    </div> 
-
 </div>
 </template>
 
@@ -111,7 +114,9 @@ export default {
   data() {
     return {
       // lookImgSrc:"/static/photo_1.png",
-      
+      uploadEntryAPI: "http://127.0.0.1:8000/starpick/upload_entry",
+      uploadPickAPI:"http://127.0.0.1:8000/starpick/upload_pick",
+      description:"BLACKPINK IN YOUR AREA!",
       hint:"点评一下TA的搭配吧！",
       editingtag:"NewTag",
       isEditTags: true,
@@ -132,9 +137,9 @@ export default {
           IdolName: "Wendy",
           PicturePath:"/static/shirt_1.png",
           Price: "₩78,000",
-          OfficialLink: "",
+          OfficialLink: "Default",
           EntryName: "dot blouse",
-          Size: "",
+          Size: "Default",
           Category: "上衣",
           TagPos: {
             top: 30,
@@ -146,9 +151,9 @@ export default {
           IdolName: "Wendy",
           PicturePath:"/static/skirt_1.png",
           Price: "$225",
-          OfficialLink: "",
+          OfficialLink: "Default",
           EntryName: "embroidered skirt",
-          Size: "",
+          Size: "Default",
           Category: "下装",
           TagPos: {
             top: 60,
@@ -161,14 +166,14 @@ export default {
         y: 0
       },
       __defalut__pick__template__:{ // read only.
-          Brand: "",
-          IdolName: "",
-          PicturePath:"",
-          Price: "",
-          OfficialLink: "",
-          EntryName: "",
-          Size: "",
-          Category: "",
+          Brand: "-",
+          IdolName: "-",
+          PicturePath:"-",
+          Price: "-",
+          OfficialLink: "-",
+          EntryName: "-",
+          Size: "-",
+          Category: "-",
           TagPos: {
             top: -1,
             left: -1
@@ -245,13 +250,13 @@ export default {
   methods: {
     //  field edit control
     onEditPickField(key){
-      console.log("> edit pick", key)
+      // console.log("> edit pick", key)
       this.pickFieldIsEdit[key] = true;
       this.pickFieldBuf[key] = this.currentPick[key];
-      console.log(this.pickFieldIsEdit)
+      // console.log(this.pickFieldIsEdit)
     },
     onFinishEditPickField(key){
-      console.log("> end edit pick", key)
+      // console.log("> end edit pick", key)
       this.pickFieldIsEdit[key] = false;
       this.currentPick[key] = this.pickFieldBuf[key];
 
@@ -277,20 +282,89 @@ export default {
       this.$router.push({ path: "/home" });
     },
     onSubmit() {
-      this.$router.push({ path: "/upload/share" });
       // TODO: sumit upload_entry first, then
       // in its callback, POST all the picks
+      const self = this;
+      var entryform = new FormData();
+      entryform.append("token", this.$store.state.token);
+      entryform.append("picture", this.lookImgSrc);
+      console.log("> UPLOAD_INFO: this.lookImgSrc = ", this.lookImgSrc);
+      entryform.append("description", this.description + 
+             " #" +this.tags.join(" #") + " #" + this.idolNames.join(" #")); 
+      const totalPicks = this.picks.length;
 
+      $.ajax({
+        type: "POST",
+        url: this.uploadEntryAPI,
+        data: entryform,
+        contentType: false,
+        processData: false,
+        cache: false,
+        success: res => {
+          //  if  upload_entry success
+          var resjson = JSON.parse(res);
+          if (resjson.success == true) { 
+          console.log("> UploadEntry Success:  entryId = ", resjson.entryId);   
 
+          var successUploadedPick = 0;
+
+          for (var i = 0; i < self.picks.length; i++) {
+            var pickform = new FormData();
+            pickform.append("category", self.picks[i].Category);
+            // console.log(pickform, self.picks[i].Category)
+            
+            pickform.append("brand", self.picks[i].Brand);
+            pickform.append("idolName", self.picks[i].IdolName); 
+            pickform.append("price", self.picks[i].Price); 
+            pickform.append("officialLink", self.picks[i].OfficialLink); 
+            pickform.append("size", self.picks[i].Size); 
+            pickform.append("tagX", self.picks[i].TagPos.left); 
+            pickform.append("tagY", self.picks[i].TagPos.top); 
+            pickform.append("tagContent", self.picks[i].Brand); 
+            
+            pickform.append("token", self.$store.state.token); 
+            pickform.append("entryId",  resjson.entryId); 
+            
+            var curptr = (function(k) { return function(){return k};
+            })(i);
+
+            let config = { 
+              headers: { 
+                  'Content-Type': 'multipart/form-data'  //之前说的以表单传数据的格式来传递fromdata
+              } 
+            }; 
+            this.$http.post(self.uploadPickAPI, pickform, config).then( (res) => {
+              successUploadedPick++;
+              if (successUploadedPick === totalPicks) {
+                // end uploaded 
+                this.$router.push({ path: "/upload/share" }); 
+              }
+            }).catch((error) =>{
+              console.log("> Upload Pick failed at #[",curptr(),"]"); 
+              console.log("> ERROR: ", error)
+            });
+          } 
+          } else {
+            // upload entry failed
+            console.log("> UploadEntry Failed :\n", resjson );
+            return ;
+          }
+          // -----------------------------------------
+        },
+        error: err => {
+            // upload entry failed 
+          console.log("> UploadEntry Post Error: \n", err);
+        }
+      });
     },
     onAddItem() {
       this.picks.push({
         Brand: "请填写品牌",
         IdolName: this.picks[this.picks.length - 1].IdolName,
-        Price: "",
-        OfficialLink: "",
-        EntryName: "",
-        Size: "",
+        Price: "0",
+        OfficialLink: "default.com",
+        EntryName: "NewEntry",
+        Size: "Default",
         Category: "Item",
         TagPos: {
           top: 0,
@@ -344,8 +418,10 @@ export default {
       var nodes = document.querySelectorAll("#photo-inner-container a");
       nodes.forEach((e, i) => {
         if (e == src) {
+          // save data as px!!!
           self.picks[i].TagPos.top = src.offsetTop;
           self.picks[i].TagPos.left = src.offsetLeft;
+          console.log("> UPLOAD_INFO: ", src.offsetTop);
         }
       });
     }, 
@@ -402,7 +478,7 @@ li {
 header,
 #left-container,
 #tab-container {
-  padding: 0 8px;
+  padding: 4px 8px;
 }
 #add-item {
   background-color: lightcyan;
@@ -469,6 +545,7 @@ footer {
   display: flex;
   flex-direction: column;
   flex: 1;
+  width:95%;
 }
 #right-control {
   flex: 1;
@@ -479,10 +556,15 @@ footer {
   height: 60%;
   flex: 10;
   position: relative;
+  margin-top:10%;
+}
+#photo-inner-container {
+  width: 100%;
+  height:100%;
 }
 #photo-container img {
   margin: auto;
-  width: 100%;
+  height: 100%;
 }
 .active {
   background-color: darkturquoise;
@@ -529,97 +611,92 @@ header {
   padding: 0px 10px;
   height: auto;
 }
-#des-container{
-  height:100%; 
+#des-container {
+  height: 100%;
 }
 #text-container {
-  height:30%; 
-
+  height: 30%;
 }
-#text-container textarea{
-  padding:8px;
+#text-container textarea {
+  padding: 8px;
   height: 87%;
-  width:100%;
+  width: 100%;
   vertical-align: top;
   line-height: 14px;
 }
 #tag-container ul {
-  padding:8px;
-  margin-top:30px;
-  text-align:left;
+  padding: 8px;
+  margin-top: 30px;
+  text-align: left;
 }
-#tag-container ul li{
-  margin-right:8px;
-  margin-bottom:8px;
-  background-color:lightcyan;
-  padding:5px;
+#tag-container ul li {
+  margin-right: 8px;
+  margin-bottom: 8px;
+  background-color: lightcyan;
+  padding: 5px;
 }
-#tab-image{
+#tab-image {
   padding: 10px 0px 0px 0px;
 }
-#tab-image img{
-  width:100%;
+#tab-image img {
+  width: 100%;
 }
-#upload-pick-image{
-  width:100%;
-  background-color:darkturquoise;
-  color:white;
+#upload-pick-image {
+  width: 100%;
+  background-color: darkturquoise;
+  color: white;
   cursor: help;
-  padding:5px 0px;
+  padding: 5px 0px;
 }
-.field-container input{
+.field-container input {
   /* max-width:70px; */
   background: none;
   border-bottom: 1px dashed darkcyan;
-  border-top:none;
-  border-left:none;
-  border-right:none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
 }
 
-
-
-
-#upload-imgs-container ul{
+#upload-imgs-container ul {
   /* padding: 2%; */
   padding: 0;
 }
-#upload-imgs-container li{
-
-  border: 1px dashed lightgray; 
+#upload-imgs-container li {
+  border: 1px dashed lightgray;
   display: inline-block;
   list-style: none;
-  height:100px;
-  width:100px;
-  margin:3%;
+  height: 100px;
+  width: 100px;
+  margin: 3%;
   /* overflow: hidden; */
 }
-#upload-imgs-container li img{
-  height:100%;
-  max-width:100px;
+#upload-imgs-container li img {
+  height: 100%;
+  max-width: 100px;
 }
 
-#upload-imgs-container li div{
-  margin-top:5px;
+#upload-imgs-container li div {
+  margin-top: 5px;
 }
-#upload-imgs-container li div span{
-  padding:8px;
-  color:white;
+#upload-imgs-container li div span {
+  padding: 8px;
+  color: white;
   background-color: darkturquoise;
   border-radius: 100px;
   font-size: 14px;
 }
-#upload-imgs-container li div  .first{
+#upload-imgs-container li div .first {
   background-color: lightcoral;
 }
 
-#upload-pick-image{
+#upload-pick-image {
   position: relative;
 }
 
-#item-img-upload{
+#item-img-upload {
   position: absolute;
-  left:0;
-  top:0;
-  opacity:0;
+  left: 0;
+  top: 0;
+  opacity: 0;
 }
 </style>

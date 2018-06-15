@@ -6,7 +6,9 @@ const store = new Vuex.Store({
     state:{
         token: null,
         username: null,
-        uploadedImageSrc: null
+        email: null,
+        uploadedImageSrc: null,
+        id: null
     },
     getters:{
 
@@ -15,10 +17,13 @@ const store = new Vuex.Store({
         userLogin(state, obj){
             state.token = obj.token;
             state.username = obj.username;
+            state.id = obj.id;
         },
         userLogout(state){
             state.token = null;
             state.username = null;
+            state.id = null;
+            state.email = null;
         },
         addUploadImageSrcs(state, src){
             state.uploadedImageSrc = (src);

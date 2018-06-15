@@ -23,6 +23,8 @@ import $ from "jquery";
 export default {
   data() {
     return {
+      getPickAPI: "http://127.0.0.1:8000/starpick/get_pick",
+      
       PickEntry: {},
       EntryAlias: {
         Brand: "品牌",
@@ -37,7 +39,7 @@ export default {
   },
   methods: {
     requestForEntry(pickid) {
-      return {
+      var res  = {
         PickEntryID: "wendy02",
         PicturePath:"/static/skirt_1.png",
         Brand: "Maje",
@@ -52,16 +54,23 @@ export default {
           left: 40
         }
       };
+      this.$http.get(this.getPickAPI, {
+        params: {
+          tagId: pickid
+        }
+      })
+      return res;
     }
   },
   watch: {
     $route(to, from) {
-      this.PickEntry = this.requestForEntry(this.$route.params);
+      this.PickEntry = this.requestForEntry(this.$route.query.PickEntryID);
+      
       // 对路由变化作出响应...
     }
   },
   mounted() {
-    this.PickEntry = this.requestForEntry(this.$route.params);
+    this.PickEntry = this.requestForEntry(this.$route.query.PickEntryID);
   }
 };
 </script>

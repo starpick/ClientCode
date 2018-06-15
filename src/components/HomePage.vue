@@ -15,7 +15,7 @@
             </li>
             <li><div style="margin:auto;"><button id="upload-button" v-on:click="onUploadClick"> + </button></div> </li>
             <li><div>{{$store.state.username}}</div> </li>
-            <li> <img id="logout-icon" src="/static/exit.png"></img>   </li>
+            <li> <img id="logout-icon" @click="onLogOut()" src="/static/exit.png"></img>   </li>
 
         </ul>
       </header>
@@ -25,11 +25,12 @@
             <div class="username">{{feed.Username}}</div>
           </div>
           <div class="img-container">
+            <!-- tag here -->
               <img :src="feed.PicturePath"></img>
               <a class="tag" v-for="t in feed.PickEntries" 
-              :style="{top: t.TagPos.top + '%', left: t.TagPos.left + '%'}"
+              :style="{top: t.TagY + 'px', left: t.TagX + 'px'}"
               @click="onClickTag(t)"
-                > <span >{{t.Brand}} </span></a>
+                > <span >{{t.Content}} </span></a>
             <div class="icon-container">
               <ul>
                 <li class="left-li  " @click="onPick(feed.UploadEntryID)"> 
@@ -60,10 +61,14 @@
               </div>
                 <div class="comments-container">
                     <ul>
-                        <li v-for="cmt in feed.Comments" class="cmts">
-                       <span>{{cmt.User}}</span> {{cmt.Content}} 
-                       <span class="timestamp">{{cmt.TimeStamp}}</span>
+                        <li v-for="(cmt, index) in feed.Comments" v-if="index<3" class="cmts">
+                       <span>{{cmt.username}}</span> {{cmt.content}} 
+                       <!-- <span class="timestamp">{{cmt.TimeStamp}}</span> -->
                         </li>
+                         <li v-for="(cmt, index) in feed.SelfComments" class="cmts">
+                       <span>{{cmt.User}}</span> {{cmt.Content}} 
+                        </li>
+                        <span v-if="feed.Comments.length >= 3"> more ... </span>
 
                         <li class="user-send-comment"> 
                           <input placeholder="发表评论！" v-model="comments[index]"
@@ -83,15 +88,29 @@ export default {
   name: "HomePage",
   data() {
     return {
-      comments:[],
-      feeds: [
+      getEntryAPI: "http://127.0.0.1:8000/starpick/get_entry",
+      getTagsAPI: "http://127.0.0.1:8000/starpick/get_tags",
+      getPickAPI: "http://127.0.0.1:8000/starpick/get_pick",
+      getCommentsAPI: "http://127.0.0.1:8000/starpick/comment/getComments",
+      getLikesAPI: "http://127.0.0.1:8000/starpick/get_likes",
+      addLikeAPI: "http://127.0.0.1:8000/starpick/like",
+      addUnlikeAPI: "http://127.0.0.1:8000/starpick/unlike",
+      addCommentAPI: "http://127.0.0.1:8000/starpick/comment/makecomment",
+      config: {
+        headers: {
+          "Content-Type": "multipart/form-data" //之前说的以表单传数据的格式来传递fromdata
+        }
+      },
+      comments: [],
+      feeds: [],
+      fakeFeed: [
         {
           UploadEntryID: "1",
           Username: "ilovewendy",
           PicturePath: "/static/photo_1.png",
           PickEntries: [
             {
-              PickEntryID:"wendy01",
+              PickEntryID: "wendy01",
               Brand: "Monts",
               IdolName: "Wendy",
               Price: "₩78,000",
@@ -105,7 +124,7 @@ export default {
               }
             },
             {
-              PickEntryID:"wendy02",
+              PickEntryID: "wendy02",
               Brand: "Maje",
               IdolName: "Wendy",
               Price: "$225",
@@ -142,7 +161,7 @@ export default {
           PicturePath: "/static/ceo.png",
           PickEntries: [
             {
-              PickEntryID:"starpick01",
+              PickEntryID: "starpick01",
               Brand: "Original",
               IdolName: "StarPick CEO",
               Price: "$199",
@@ -177,20 +196,49 @@ export default {
       UserInfo: {
         UserPick: [],
         UserDiss: []
+      },
+      emptyFeed: {
+        UploadEntryID: "",
+        Username: "",
+        PicturePath: "",
+        PickEntries: [],
+        Pick: -1,
+        Description: "",
+        Tags: [],
+        Comments: [],
+        isBookmark: false,
+        SelfComments:[]
+
       }
     };
   },
   methods: {
-    onClickTag(pickentry){
-      this.$router.push({ path: "/pickentry/:pickentry", 
-      params:{pickentryid: pickentry.PickEntryID}});
+    onClickTag(pickentry) {
+      console.log(pickentry);
+      this.$router.push({
+        path: "/pickentry/",
+        query: {
+          PickEntryID: pickentry.pickId
+        }
+      });
     },
     onUploadClick() {
+      this.$store.state.uploadedImageSrc = null;
       this.$router.push({ path: "/upload" });
+    },
+    onLogOut() {
+      this.$store.commit("userLogout");
+      this.$router.push({ path: "/" });
     },
     onPick(id) {
       // console.log(id)
       var inpick = this.UserInfo.UserDiss.indexOf(id);
+      this.$http.get(this.addLikeAPI, {
+        params: {
+          token: this.$store.state.token,
+          entryId: id
+        }
+      });
       if (inpick != -1) {
         this.UserInfo.UserDiss.splice(inpick, 1);
       }
@@ -200,6 +248,12 @@ export default {
     },
     onDiss(id) {
       var inpick = this.UserInfo.UserPick.indexOf(id);
+      this.$http.get(this.addUnlikeAPI, {
+        params: {
+          token: this.$store.state.token,
+          entryId: id
+        }
+      });
       if (inpick != -1) {
         this.UserInfo.UserPick.splice(inpick, 1);
       }
@@ -215,22 +269,115 @@ export default {
     },
     addComment(pickentryid, i) {
       var dt = new Date();
-      this.feeds[i].Comments.push( 
-            {
-              User: "current user",
-              Content: this.comments[i],
-              TimeStamp: dt.getYear() + '-' + dt.getMonth() + dt.getDay()
-            }
-      );
+      var newcontent = this.comments[i];
+
+      // post to server
+      var form = new FormData();
+      form.append("token", this.$store.state.token);
+      form.append("entryId", pickentryid);
+      form.append("content", newcontent);
+      this.$http
+        .post(this.addCommentAPI, form, this.config)
+        .then(res => {
+          if (res.data.success) { 
+          } else {
+            alert("(。・＿・。)ﾉI’m sorry~发送评论失败！");
+          }
+        })
+        .catch(err => {
+          console.log("> HOMEPAGE: Fail send comments\n", err)
+        });
+
+      // update view immediately
+      this.feeds[i].SelfComments.push({
+        User: "current user",
+        Content: newcontent,
+        TimeStamp: dt.getYear() + "-" + dt.getMonth() + dt.getDay()
+      });
       this.comments[i] = "";
     }
-  
   },
-  mounted(){
-    console.log(this.$store.state)
+  async mounted() {
+    const debug = !false;
+    console.log(this.$store.state);
     for (var i = 0; i < this.feeds.length; i++) {
       this.comments.push("");
-      
+    }
+
+    var entries = ["19", "18","17", "14", "15"];
+    const self = this;
+
+    for (var i = 0; i < entries.length; i++) {
+      var feedEntry = JSON.parse(JSON.stringify(self.emptyFeed));
+
+      var curptr = (function(t) {
+        return function() {
+          return t;
+        };
+      })(i);
+
+      await this.$http
+        .get(this.getEntryAPI, {
+          params: {
+            entryId: entries[i]
+          }
+        })
+        .then(res => {
+          if (debug) console.log("> HOMEPAGE: Get Upload Entry: ", res.data);
+          if (res.data.success && res.data.entry != null) {
+            feedEntry.Description = res.data.entry.description;
+            feedEntry.PicturePath = res.data.entry.picture;
+            feedEntry.UploadEntryID = res.data.entry.entryId;
+            feedEntry.Pick = res.data.entry.likenumber;
+            // get tags
+            if (debug) console.log("> HOMEPAGE : GETTING TAGS OF ", curptr());
+            return self.$http.get(self.getTagsAPI, {
+              params: {
+                entryId: entries[curptr()]
+              }
+            });
+          }
+        })
+        .catch(err => {
+          if (debug) console.log("> HOMEPAGE: Get Upload Entry", " ERROR : \n", err);
+        })
+        .then(res => {
+          feedEntry.PickEntries = res.data.tags;
+          if (debug) console.log("> HOMEPAGE: Get Tags: ", res.data);
+
+          return self.$http.get(self.getCommentsAPI, {
+            params: {
+              entryId: entries[curptr()]
+            }
+          });
+        })
+        .catch(err => {
+          if (debug) console.log(
+            "> HOMEPAGE: Get Tags of entry #[",
+            curptr(),
+            "] ERROR : \n",
+            err
+          );
+        })
+        .then(res => {
+          if (debug) console.log(
+            "> HOMEPAGE: Get Comments of entry #[",
+            curptr(),
+            "]\n",
+            res.data
+          );
+          feedEntry.Comments = res.data.comments;
+          self.feeds.push(feedEntry);
+          if (debug) console.log("> HOMEPAGE: Add feed: ", feedEntry);
+        })
+        .catch(err => {
+          if (debug) console.log(
+            "> HOMEPAGE: Get Picks of entry #[",
+            curptr(),
+            "] ERROR : \n",
+            err
+          );
+        });
     }
   }
 };
@@ -249,8 +396,8 @@ li {
 header {
   background-color: darkturquoise;
 }
-input:focus{
-  outline:none;
+input:focus {
+  outline: none;
 }
 .icon-container ul,
 .social-counter,
@@ -258,7 +405,7 @@ input:focus{
 header {
   /* to control the same padding-left. */
   padding-left: 2%;
-  padding-right:1%;
+  padding-right: 1%;
 }
 header ul {
   display: flex;
@@ -271,7 +418,6 @@ header ul {
 header li {
   display: flex;
   width: 100%;
-  
 }
 header li div {
   margin: auto;
@@ -280,13 +426,13 @@ header li div {
   flex: 2;
   display: flex;
   text-align: center;
-  margin-left:-8px;
+  margin-left: -8px;
   /* padding:0 5%; */
 }
 #search-icon {
-  /* flex: 0.5; */ 
-  max-height:50px;
-} 
+  /* flex: 0.5; */
+  max-height: 50px;
+}
 #search-bar input {
   margin: auto;
   width: auto;
@@ -373,7 +519,7 @@ li {
   margin-left: 0;
 }
 .comments-container ul {
-  padding-left:8%;
+  padding-left: 8%;
   text-align: left;
   font-size: 12px;
 }
@@ -397,18 +543,18 @@ li {
   height: 20px;
 }
 .pick-icon {
-  width:20px;
+  width: 20px;
   background-image: url(/static/pick.png);
   background-size: 28px 28px;
   background-repeat: no-repeat;
   background-position: -3px -5px;
 }
 .comment-icon {
-  width:20px;
+  width: 20px;
   background-image: url(/static/comment.png);
   background-size: 20px 20px;
   background-repeat: no-repeat;
-} 
+}
 
 .tag {
   position: absolute;
@@ -424,51 +570,50 @@ li {
   opacity: 1;
   font-size: 10px;
 }
-.social-counter div{
+.social-counter div {
   margin-left: 10px;
 }
-.timestamp{
-  color:lightgray;
-  margin-left:10px;
+.timestamp {
+  color: lightgray;
+  margin-left: 10px;
   font-style: italic;
 }
-#upload-button{
+#upload-button {
   position: relative;
   vertical-align: middle;
   background: lightcyan;
-  color:darkcyan;
+  color: darkcyan;
   border: none;
-  cursor:pointer;
+  cursor: pointer;
   border-radius: 100px;
-  padding:12% 30%;
-  overflow:hidden;
-  font-size:22px;
+  padding: 12% 30%;
+  overflow: hidden;
+  font-size: 22px;
 }
-
 
 #upload-button:after {
   /* 点击后的状态 */
-    content: "";
-    background: rgb(1, 252, 239);
-    display: block;
-    position: absolute;
-    padding:100px;
-    /* padding：调大小的 */
-    margin:-18px -10px;
-    /* margin: 调位置的 */
-    width:3px;
-    opacity: 0;
-    
-    transition: all 0.8s
+  content: "";
+  background: rgb(1, 252, 239);
+  display: block;
+  position: absolute;
+  padding: 100px;
+  /* padding：调大小的 */
+  margin: -18px -10px;
+  /* margin: 调位置的 */
+  width: 3px;
+  opacity: 0;
+
+  transition: all 0.8s;
 }
 
-#upload-button:active:after { 
+#upload-button:active:after {
   /* 点击时的状态 */
-    padding: 0;
-    margin: 0;
-    opacity: 1;
-    width:50px;
-    transition: 0s;
+  padding: 0;
+  margin: 0;
+  opacity: 1;
+  width: 50px;
+  transition: 0s;
 }
 
 #logo-img {
@@ -477,15 +622,14 @@ li {
   width: 100%;
   max-width: 80%;
   border-radius: 100px;
-
 }
-#logo-img-container{
+#logo-img-container {
   /* overflow: hidden; */
-  height:80%;
+  height: 80%;
   margin: auto;
 }
 #logout-icon {
-  height:40px;
-  margin:auto;
+  height: 40px;
+  margin: auto;
 }
 </style>

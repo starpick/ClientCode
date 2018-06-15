@@ -1,6 +1,10 @@
 <template>
 <div id="upload-share-container"> 
- <div id="hint">分享到...</div>
+ <div id="hint">
+     <div>你的 Pick 已经上传成功！١١(❛ᴗ❛)</div>
+    <img :src ="this.$store.state.uploadedImageSrc"  ></img>
+     <div>分享到...</div>
+     </div>
  <div id="option-container">
 
 <div id="frencircle"  class="option"><span>朋友圈</span></div>
@@ -26,7 +30,10 @@ export default {
 <style scoped>
 div,
 li {
-  border: 1px dashed lightgray;
+  /* border: 1px dashed lightgray; */
+}
+img {
+    max-height:200px;
 }
 #upload-share-container {
     height:100%;
