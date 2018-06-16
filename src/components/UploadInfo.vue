@@ -91,8 +91,16 @@
             <div id="des-container" v-show="!isEditTags">
                 
                 <div id="text-container">
-                  <textarea 
-                  v-bind:placeholder="hint" v-model="description"> BLACKPINK IN YOUR AREA! </textarea>
+                      <el-input
+                        type="textarea"
+                        :rows="2"
+                        placeholder="请输入内容"
+                        v-model="description">
+                      </el-input>
+
+                  <!-- <textarea 
+                  v-bind:placeholder="hint" v-model="description"> 
+                  BLACKPINK IN YOUR AREA! </textarea> -->
                 </div>
                 <div id="tag-container">
                   <ul id="tag-list" @click="onAddCustomTag()">

@@ -5,7 +5,7 @@
        <span id="pickname">{{PickEntry.EntryName}}</span>
     </div>
     <div id="img-container">
-        <img :src="PickEntry.PicturePath"></img>
+        <img :src="PickEntry.pic"></img>
     </div>
     <div id="info-container">
         <div v-for="(val, key) in  PickEntry" 
@@ -27,19 +27,19 @@ export default {
       
       PickEntry: {},
       EntryAlias: {
-        Brand: "品牌",
-        IdolName: "爱豆",
-        Price: "价格",
-        OfficialLink: "官网链接",
-        EntryName: "Item名称",
-        Size: "尺寸",
-        Category: "类别"
+        brand: "品牌",
+        idolName: "爱豆",
+        price: "价格",
+        officialLink: "官网链接",
+        entryName: "Item名称",
+        size: "尺寸",
+        category: "类别"
       }
     };
   },
   methods: {
-    requestForEntry(pickid) {
-      var res  = {
+    async requestForEntry(pickid) {
+      var result  = {
         PickEntryID: "wendy02",
         PicturePath:"/static/skirt_1.png",
         Brand: "Maje",
@@ -54,23 +54,28 @@ export default {
           left: 40
         }
       };
-      this.$http.get(this.getPickAPI, {
+      var res = await this.$http.get(this.getPickAPI, {
         params: {
-          tagId: pickid
+          pickId: pickid
         }
-      })
-      return res;
+      }).then(res => {
+        this.PickEntry = res.data.pick; 
+      }).catch(err=>{
+        console.log("> PICK_ENTRY_DETAIL ERROR:  ", err);
+      });
     }
   },
   watch: {
     $route(to, from) {
-      this.PickEntry = this.requestForEntry(this.$route.query.PickEntryID);
+      this.requestForEntry(this.$route.query.PickEntryID);
       
       // 对路由变化作出响应...
     }
   },
   mounted() {
-    this.PickEntry = this.requestForEntry(this.$route.query.PickEntryID);
+     this.requestForEntry(this.$route.query.PickEntryID);
+    console.log(this.PickEntry)
+    
   }
 };
 </script>
