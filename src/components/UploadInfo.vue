@@ -498,6 +498,7 @@ header,
   margin: 0;
   flex-wrap: wrap;
   width: 100%;
+  height:50px;
 }
 #tab-body-ul {
   padding: 0;
@@ -514,10 +515,18 @@ li {
 #right-control div {
   border: 1px dashed lightgray;
   box-sizing: border-box;
-  flex-basis: 50%;
-  height: 50px;
   text-align: center;
   line-height: 50px;
+}
+#tab-head-ul li{
+  height: 30px;
+  flex-basis: 33%;
+  line-height: 30px;
+}
+#right-control div {
+  height: 50px;
+  flex-basis: 50%;
+
 }
 #tab-body-ul li {
   padding: 10px;
@@ -525,9 +534,7 @@ li {
 #tab-body-ul li div {
   margin-bottom: 8px;
 }
-#photo-inner-container {
-  position: relative;
-}
+
 #uploader-info-container {
   height: 100%;
   width: 100%;
@@ -536,7 +543,8 @@ li {
 }
 header,
 footer {
-  flex: 1;
+  /* flex: 1; */
+  height:50px;
 }
 #info-container {
   padding-top: 8px;
@@ -555,20 +563,20 @@ footer {
   flex: 1;
   width:95%;
 }
-#right-control {
-  flex: 1;
-}
+
 #photo-container {
   overflow: hidden;
   width: 100%;
   height: 60%;
   flex: 10;
   position: relative;
-  margin-top:10%;
+  margin-top:5%;
 }
 #photo-inner-container {
   width: 100%;
-  height:100%;
+  /* height:100%; */
+  position: relative;
+  height: 300px;
 }
 #photo-container img {
   margin: auto;
@@ -621,6 +629,7 @@ header {
 }
 #des-container {
   height: 100%;
+  flex:1;
 }
 #text-container {
   height: 30%;

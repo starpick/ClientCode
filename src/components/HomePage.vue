@@ -6,23 +6,26 @@
             <li id="logo-img-container"> 
                   <img id="logo-img" src="/static/logo.png"></img> 
            </li>
-           <li> 
-                  <img id="search-icon" src="/static/search.png"></img>               
-                    
-           </li>
              <li id="search-bar">
-                <input > </input>
+               <!-- <i id="search-icon" class="el-icon-search  "></i> -->
+                <input placeholder="发现新的Pick..." > </input>
             </li>
-            <li><div style="margin:auto;"><button id="upload-button" v-on:click="onUploadClick"> + </button></div> </li>
-            <li><div>{{$store.state.username}}</div> </li>
+            <li><div style="margin:auto;"><i id="upload-button" v-on:click="onUploadClick" class="el-icon-plus icon"></i>  </div> </li>
+            <li><div id="username-label">{{$store.state.username}}</div> </li>
+
             <li> <img id="logout-icon" @click="onLogOut()" src="/static/exit.png"></img>   </li>
 
         </ul>
       </header>
       <div class="feed-container" v-for="(feed, index) in feeds">
         <div class="info-container">
-          <div class="avatar"></div>
-            <div class="username">{{feed.Username}}</div>
+          <div class="avatar-container">
+            <div class="avatar">
+              <img class="avatar-img" src="/static/ceo.png"></img>
+            </div>
+          </div>
+            <div class="username"> Username{{feed.User}}</div>
+            <div  > debug: {{feed.UploadEntryID}}</div>
           </div>
           <div class="img-container">
             <!-- tag here -->
@@ -34,13 +37,13 @@
             <div class="icon-container">
               <ul>
                 <li class="left-li  " @click="onPick(feed.UploadEntryID)"> 
-                  <span  :class="{pick:true, ispick:isPicked(feed.UploadEntryID)}">  </span> 
+                  <span  :class="{judge:true,pick:true, ispick:isPicked(feed.UploadEntryID)}">  </span> 
                   </li>
                 <li class="left-li  " @click="onDiss(feed.UploadEntryID)">  
-                  <span   :class="{diss:true, isdiss:isDissed(feed.UploadEntryID)}"> </span> 
+                  <span   :class="{judge:true,diss:true, isdiss:isDissed(feed.UploadEntryID)}"> </span> 
                   </li> 
                 <li class="empty-li">  </li> 
-                <li class="right-li">{{feed.isBookmark}} </li> 
+                <!-- <li class="right-li">{{feed.isBookmark}} </li>  -->
                 </ul>
               </div>
           </div>
@@ -96,6 +99,7 @@ export default {
       addLikeAPI: "http://127.0.0.1:8000/starpick/like",
       addUnlikeAPI: "http://127.0.0.1:8000/starpick/unlike",
       addCommentAPI: "http://127.0.0.1:8000/starpick/comment/makecomment",
+      queryPickAPI:"http://127.0.0.1:8000/starpick/query_like",
       config: {
         headers: {
           "Content-Type": "multipart/form-data" //之前说的以表单传数据的格式来传递fromdata
@@ -290,14 +294,14 @@ export default {
 
       // update view immediately
       this.feeds[i].SelfComments.push({
-        User: "current user",
+        User: this.$store.state.username,
         Content: newcontent,
         TimeStamp: dt.getYear() + "-" + dt.getMonth() + dt.getDay()
       });
       this.comments[i] = "";
     }
   },
-  beforeMount() {
+  async beforeMount() {
     if (localStorage.username !== undefined) {
           this.$store.commit("userLogin", {
             token: localStorage.token,
@@ -306,6 +310,25 @@ export default {
             username: localStorage.username
           });
           // this.$router.push({ path: "/home" });
+    }
+
+
+    var entries = ["19", "18","17", "14", "15"];
+
+    for (var i = 0; i < entries.length; i++) {
+      // check pick
+      await this.$http.get(this.queryPickAPI, {
+        params: {
+          email: this.$store.state.email,
+          entryId: entries[i]
+        }
+      }).then(res =>{
+        if (res.data.success) {
+          if(res.data.like) this.UserInfo.UserPick.push( parseInt(entries[i]) );
+          else this.UserInfo.UserDiss.push( parseInt(entries[i]) );
+        }
+      });
+
     }
   },
   async mounted() {
@@ -318,9 +341,11 @@ export default {
     var entries = ["19", "18","17", "14", "15"];
     const self = this;
 
+    
+
     for (var i = 0; i < entries.length; i++) {
       var feedEntry = JSON.parse(JSON.stringify(self.emptyFeed));
-
+      //  get feed entry
       var curptr = (function(t) {
         return function() {
           return t;
@@ -390,6 +415,7 @@ export default {
           );
         });
     }
+    console.log("> HOME_PAGE: picks = ", this.UserInfo.UserPick);
   }
 };
 </script>
@@ -442,10 +468,15 @@ header li div {
 }
 #search-icon {
   /* flex: 0.5; */
-  max-height: 50px;
+  padding: 4%;
+margin:auto;
+  background: lightcyan;
+  border-radius: 100px;
 }
+
 #search-bar input {
-  margin: auto;
+  margin: 10px;
+  
   width: auto;
 }
 header li {
@@ -463,16 +494,11 @@ li {
   padding-top: 20px;
   padding-bottom: 20px;
 }
-.avatar {
-  width: 0px;
-  height: 0px;
-  padding: 10px 18px;
-  border-radius: 50px;
-  background-color: lightcyan;
-}
 .username {
   padding: 5px;
-  margin-left: 8px;
+  margin-left: 21px;
+  font-weight: bold;
+  color:darkcyan;
 }
 .description-container {
   padding: 10px 20px;
@@ -494,24 +520,37 @@ li {
   justify-content: space-between;
   text-align: center;
 }
-.pick {
+.judge {
   border: 1px solid lightgrey;
+  padding: 2px 13px;
+  border-radius: 100px;
+
+}
+
+.pick {
   background-color: white;
-  padding: 0px 8px;
-  border-radius: 10px;
 }
 .ispick {
   border: none;
-  background-color: rgb(255, 0, 128);
+  /* background-color: rgb(255, 0, 128); */
+   width: 20px;
+  background-image: url(/static/redheart.png);
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+  background-position: 0px 2px;
 }
+
+ 
 .diss {
   background-color: lightgrey;
-  border-radius: 10px;
-  padding: 0px 8px;
 }
 .isdiss {
   border: none;
-  background-color: grey;
+  /* background-color: grey; */
+  background-image: url(/static/diss.png);
+  background-size: 33px 33px;
+  background-repeat: no-repeat;
+  background-position: -3px -5px;
 }
 .icon-container ul li {
   padding: 4px;
@@ -543,10 +582,10 @@ li {
 .img-container {
   overflow: hidden;
   position: relative;
+  height:300px;
 }
 .img-container img {
   height: 100%;
-  max-height: 400px;
 }
 .cnt {
   /* padding: 5px; */
@@ -597,11 +636,15 @@ li {
   border: none;
   cursor: pointer;
   border-radius: 100px;
-  padding: 12% 30%;
+  padding: 15%;
   overflow: hidden;
   font-size: 22px;
 }
+.icon {
+  background: lightcyan;
+  border-radius: 100px;
 
+}
 #upload-button:after {
   /* 点击后的状态 */
   content: "";
@@ -642,5 +685,42 @@ li {
 #logout-icon {
   height: 40px;
   margin: auto;
+}
+#username-label {
+  color:lightcyan;
+  font-weight: bold;
+}
+
+.avatar-container {
+  width: 0px;
+  height: 0px;
+  padding: 10px 18px;
+  border-radius: 50px;
+  background-color: lightcyan;
+  overflow: hidden;
+  position: relative;
+}
+.avatar {
+  position: absolute;
+top:0px;
+left:0px;
+}
+.avatar-img {
+  /* position: absolute; */
+  overflow: hidden;
+  border-radius: 150px;
+
+  max-width:50px;
+  /* max-height:30px; */
+}
+.info-container {
+  border-bottom:1px darkcyan dashed;
+  /* border-top:1px darkcyan dashed; */
+
+}
+.feed-container {
+  border-bottom:1px darkcyan dashed;
+  border-top:1px darkcyan dashed;
+
 }
 </style>
