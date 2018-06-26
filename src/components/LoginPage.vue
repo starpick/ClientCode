@@ -199,6 +199,19 @@ export default {
       });
       return false;
     }
+  },
+  beforeMount() {
+    if (localStorage.username !== undefined) {
+       
+          this.$store.commit("userLogin", {
+            token: localStorage.token,
+            id: localStorage.id,
+            email: localStorage.email,
+            username: localStorage.username
+          });
+          this.$router.push({ path: "/home" });
+
+    }
   }
 };
 </script>
