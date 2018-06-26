@@ -3,12 +3,15 @@
  <div id="hint">
      <div>你的 Pick 已经上传成功！١١(❛ᴗ❛)</div>
     <img :src ="this.$store.state.uploadedImageSrc"  ></img>
-     <div>分享到...</div>
+     <!-- <div>分享到...</div> -->
      </div>
  <div id="option-container">
 
-<div id="frencircle"  class="option"><span>朋友圈</span></div>
-<div id="weibo"   class="option"><span>微博</span></div>
+<!-- <div id="frencircle"  class="option"><span>朋友圈</span></div> -->
+<!-- <div id="weibo"   class="option">
+   
+   <a href="http://service.weibo.com/share/share.php?appkey=&title=&url=&searchPic=false&style=simple" target="_blank">  微博</a>
+    </div> -->
 
 
 </div>
@@ -68,7 +71,7 @@ img {
     left: 12%;
     
 }
-#home a:visited{
+a:visited{
     color:white;
 }
 .option {
@@ -78,6 +81,10 @@ img {
   width: 70px;
   height: 70px;
   border-radius: 100px;
+}
+a {
+    text-decoration: none;
+
 }
 .option span, .option  a{
     position: absolute;

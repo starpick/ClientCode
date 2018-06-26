@@ -31,10 +31,12 @@
             <!-- tag here -->
               <img :src="feed.PicturePath"></img>
               <a class="tag" v-for="t in feed.PickEntries" 
-              :style="{top: t.TagY + 'px', left: t.TagX + 'px'}"
+              :style="{top: t.tagY + 'px', left: t.tagX + 'px'}"
               @click="onClickTag(t)"
                 > <span >{{t.Content}} </span></a>
-            <div class="icon-container">
+            
+          </div>
+          <div class="icon-container">
               <ul>
                 <li class="left-li  " @click="onPick(feed.UploadEntryID)"> 
                   <span  :class="{judge:true,pick:true, ispick:isPicked(feed.UploadEntryID)}">  </span> 
@@ -45,7 +47,6 @@
                 <li class="empty-li">  </li> 
                 <!-- <li class="right-li">{{feed.isBookmark}} </li>  -->
                 </ul>
-              </div>
           </div>
           <div class="social-container">
             <div class="description-container">
@@ -313,7 +314,7 @@ export default {
     }
 
 
-    var entries = ["19", "18","17", "14", "15"];
+    var entries = ["19", "18","16", "14", "15"];
 
     for (var i = 0; i < entries.length; i++) {
       // check pick
@@ -338,7 +339,7 @@ export default {
       this.comments.push("");
     }
 
-    var entries = ["19", "18","17", "14", "15"];
+    var entries = ["19","16"];
     const self = this;
 
     
@@ -422,9 +423,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.home-container {
+#home-container {
   width: 100%;
   height: 100%;
+  overflow:auto;
 }
 div,
 li {
@@ -432,6 +434,9 @@ li {
 }
 header {
   background-color: darkturquoise;
+  /* position:fixed; */
+  width:100%;
+  z-index: 100;
 }
 input:focus {
   outline: none;
@@ -443,6 +448,7 @@ header {
   /* to control the same padding-left. */
   padding-left: 2%;
   padding-right: 1%;
+  /* height:50px; */
 }
 header ul {
   display: flex;
@@ -702,8 +708,8 @@ li {
 }
 .avatar {
   position: absolute;
-top:0px;
-left:0px;
+  top:0px;
+  left:0px;
 }
 .avatar-img {
   /* position: absolute; */
@@ -719,8 +725,11 @@ left:0px;
 
 }
 .feed-container {
+  /* margin-top: 50px; */
   border-bottom:1px darkcyan dashed;
   border-top:1px darkcyan dashed;
 
 }
+
+
 </style>

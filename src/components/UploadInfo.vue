@@ -18,12 +18,8 @@
                     编辑Tag
                 </div>
             </div>
-            <div id="photo-container">
-                <div id= "photo-inner-container">
-
-
-
-                
+            <div id="photo-container"  >
+                <div id= "photo-inner-container" > 
                 <img :src="lookImgSrc" > </img>
                 <a class="tag" v-for="t in itemtags" draggable="true"   
                 @dragend="onDragingEnd" 
@@ -36,9 +32,7 @@
 
                 </div>
             </div>
-        </div>
-       
-
+        </div> 
     </div> 
      <div id="tab-container"> 
             <div v-show="isEditTags">
@@ -46,7 +40,7 @@
                     <li v-for="(pick,index) in picks" 
                     v-bind:class="{active:chosenTabIndex == index }"
                     v-on:click="onClickTabHead(index)"
-                    >{{pick.Category}} </li>
+                    >{{pick.Category}} <span class="delete-item-button" @click="onDelete(index)">X</span> </li>
                     <li id="add-item" v-on:click="onAddItem()">+ 新增</li>
                 </ul>
                     <div id="tab-image"> 
@@ -286,6 +280,9 @@ export default {
       
 
     },
+    onDelete(pickentryindex) {
+      this.picks.splice(pickentryindex, 1);
+    },
     onCancel() {
       this.$router.push({ path: "/home" });
     },
@@ -310,7 +307,7 @@ export default {
         cache: false,
         success: res => {
           //  if  upload_entry success
-          var resjson = JSON.parse(res);
+          var resjson = JSON.parse(res);  
           if (resjson.success == true) { 
           console.log("> UploadEntry Success:  entryId = ", resjson.entryId);   
 
@@ -321,6 +318,8 @@ export default {
             pickform.append("category", self.picks[i].Category);
             // console.log(pickform, self.picks[i].Category)
             
+            console.log("> UPLOAD_INFO: ",self.picks[i]);
+
             pickform.append("brand", self.picks[i].Brand);
             pickform.append("idolName", self.picks[i].IdolName); 
             pickform.append("price", self.picks[i].Price); 
@@ -429,7 +428,7 @@ export default {
           // save data as px!!!
           self.picks[i].TagPos.top = src.offsetTop;
           self.picks[i].TagPos.left = src.offsetLeft;
-          console.log("> UPLOAD_INFO: ", src.offsetTop);
+          // console.log("> UPLOAD_INFO: ", src.offsetTop);
         }
       });
     }, 
@@ -498,13 +497,16 @@ header,
   margin: 0;
   flex-wrap: wrap;
   width: 100%;
-  height:50px;
+  margin-bottom: 3%;
+
+  /* height:50px; */
 }
 #tab-body-ul {
   padding: 0;
   display: flex;
   text-align: left;
   flex-direction: column;
+  margin:0;
 }
 li {
   border: 1px dashed lightgray;
@@ -549,7 +551,7 @@ footer {
 #info-container {
   padding-top: 8px;
   display: flex;
-  flex: 14;
+  flex: 1;
   height: auto;
   overflow: hidden;
 }
@@ -567,7 +569,8 @@ footer {
 #photo-container {
   overflow: hidden;
   width: 100%;
-  height: 60%;
+  /* height: 60%; */
+  height: auto;
   flex: 10;
   position: relative;
   margin-top:5%;
@@ -632,11 +635,16 @@ header {
   flex:1;
 }
 #text-container {
-  height: 30%;
+  height: 40%;
 }
-#text-container textarea {
+#text-container div {
+  height:100%;
+  padding:0px 10px;
+}
+#text-container div textarea {
   padding: 8px;
-  height: 87%;
+  height:100%;
+  /* height: auto; */
   width: 100%;
   vertical-align: top;
   line-height: 14px;
@@ -715,5 +723,16 @@ header {
   left: 0;
   top: 0;
   opacity: 0;
+}
+.delete-item-button {
+  font-weight: bold;
+  /* font-size: 10px; */
+  padding-left: 25px;
+}
+.delete-item-button:hover {
+  color:red;
+}
+.el-textarea__inner {
+  height:100%;
 }
 </style>
