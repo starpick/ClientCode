@@ -40,7 +40,9 @@
                     <li v-for="(pick,index) in picks" 
                     v-bind:class="{active:chosenTabIndex == index }"
                     v-on:click="onClickTabHead(index)"
-                    >{{pick.Category}} <span class="delete-item-button" @click="onDelete(index)">X</span> </li>
+                    >{{pick.Category}} 
+                      <span class="delete-item-button" @click.stop="onDelete(index)">X</span> 
+                    </li>
                     <li id="add-item" v-on:click="onAddItem()">+ 新增</li>
                 </ul>
                     <div id="tab-image"> 
@@ -67,11 +69,23 @@
                           <span 
                           @click="onEditPickField(key)"  
                           >  
-                            <span v-if="false === pickFieldIsEdit[key]" >{{val}}</span> 
+                            <span v-if="false === pickFieldIsEdit[key]  && key !== 'Category'" >{{val}}</span> 
+                            
+                            <label v-if="key === 'Category'" v-for="cg in categories"  >
+                              <input type="radio" name="cg" @click="pick.Category = cg" ></input> 
+                              <span>{{cg}}</span>
+                            </label>
+
                             <span v-if="val.length == 0  && false === pickFieldIsEdit[key]"
                             v-bind:class="{unfilled:val.length == 0}"
                             >待填写</span>
-                              <input v-if="pickFieldIsEdit[key] === true" 
+                            <!-- <span>{{pick.Category}}</span> -->
+
+
+                            
+
+                            <!-- <span>{{key}}</span> -->
+                              <input v-if="pickFieldIsEdit[key] === true && key !== 'Category' " 
                               autofocus="autofocus" 
                               @blur="onFinishEditPickField(key)"
                               @keyup.esc="onCancelEditField(key)"
@@ -97,10 +111,20 @@
                   BLACKPINK IN YOUR AREA! </textarea> -->
                 </div>
                 <div id="tag-container">
-                  <ul id="tag-list" @click="onAddCustomTag()">
-                    <li v-for="i in idolNames">#{{i}}</li> 
-                    <li v-for="t in tags">#{{t}}</li> 
-                    <li> + </li>
+                    <input   v-model="tagbuf" id="add-tag-input"
+                    placeholder="添加新 tag..."
+                    @keyup.enter="endEditTag()"
+                    
+                    ></input>
+
+                  <ul id="tag-list">
+                    <!-- <li v-for="i in idolNames">#{{i}}</li>  -->
+                    <li  v-for="(t, index) in tags" 
+                    >
+                      #{{t}} 
+                      <span v-if="customTags.indexOf(t)!=-1"  class="delete-tag-button"  @click.stop="onDeleteTag(t)"> X </span>
+                    </li> 
+                    <li  @click="onAddCustomTag()"> + </li>
                   </ul>
 
                 </div>
@@ -118,11 +142,11 @@ export default {
       // lookImgSrc:"/static/photo_1.png",
       uploadEntryAPI: "http://127.0.0.1:8000/starpick/upload_entry",
       uploadPickAPI:"http://127.0.0.1:8000/starpick/upload_pick",
+      setHashTagAPI:"http://127.0.0.1:8000/starpick/upload_hashtag",
       description:"BLACKPINK IN YOUR AREA!",
       hint:"点评一下TA的搭配吧！",
       editingtag:"NewTag",
       isEditTags: true,
-      chosenTabIndex: 1,
       customTags:[],
       EntryAlias: {
         Brand: "品牌",
@@ -133,35 +157,36 @@ export default {
         Size: "尺寸",
         Category: "类别"
       },
+      chosenTabIndex:0,
       picks: [
-        {
-          Brand: "Monts",
-          IdolName: "Wendy",
-          PicturePath:"/static/shirt_1.png",
-          Price: "₩78,000",
-          OfficialLink: "Default",
-          EntryName: "dot blouse",
-          Size: "Default",
-          Category: "上衣",
-          TagPos: {
-            top: 30,
-            left: 40
-          }
-        },
-        {
-          Brand: "Maje",
-          IdolName: "Wendy",
-          PicturePath:"/static/skirt_1.png",
-          Price: "$225",
-          OfficialLink: "Default",
-          EntryName: "embroidered skirt",
-          Size: "Default",
-          Category: "下装",
-          TagPos: {
-            top: 60,
-            left: 40
-          }
-        }
+        // {
+        //   Brand: "Monts",
+        //   IdolName: "Wendy",
+        //   PicturePath:"/static/shirt_1.png",
+        //   Price: "₩78,000",
+        //   OfficialLink: "Default",
+        //   EntryName: "dot blouse",
+        //   Size: "Default",
+        //   Category: "上衣",
+        //   TagPos: {
+        //     top: 30,
+        //     left: 40
+        //   }
+        // },
+        // {
+        //   Brand: "Maje",
+        //   IdolName: "Wendy",
+        //   PicturePath:"/static/skirt_1.png",
+        //   Price: "$225",
+        //   OfficialLink: "Default",
+        //   EntryName: "embroidered skirt",
+        //   Size: "Default",
+        //   Category: "下装",
+        //   TagPos: {
+        //     top: 60,
+        //     left: 40
+        //   }
+        // }
       ],
       tagorigin: {
         x: 0,
@@ -204,10 +229,15 @@ export default {
             top: -1,
             left: -1
           }
-      }
+      },
+      categories: ["上衣","下装", "鞋子","配饰"],
+      tagbuf : "",
+      addingTag : false
     };
   },
   computed: {
+      
+
     lookImgSrc: function() {
       return this.$store.state.uploadedImageSrc;
     },
@@ -243,13 +273,31 @@ export default {
       this.itemtags.forEach(e=>{
         t.push(e.Brand);
       })
-      return t.concat(this.customTags);
+      return this.idolNames.concat(t).concat(this.customTags);
     },
     pickEntryFieldsCount: function() {
       return Object.keys(this.__defalut__pick__template__).length;
     }
   },
   methods: {
+    modifyTag(i){
+      // this.tagbuf = this.tags[i];
+      this.addingTag = true;
+
+    },
+    onAddCustomTag(){
+      this.customTags.push(this.editingtag);
+      this.tagbuf = "";
+    },
+
+    endEditTag(i){
+      this.editingtag = this.tagbuf;
+
+      this.onAddCustomTag();
+    },
+    onDeleteTag(t){
+      this.customTags.splice(this.customTags.indexOf(t), 1);
+    },
     //  field edit control
     onEditPickField(key){
       // console.log("> edit pick", key)
@@ -267,9 +315,6 @@ export default {
       this.pickFieldIsEdit[key] = false;
       this.pickFieldBuf[key] = this.currentPick[key]; 
     },
-    onAddCustomTag(){
-      this.customTags.push(this.editingtag);
-    },
     onClickTabHead(i) {
       this.chosenTabIndex = i;
       // manage edit buffer
@@ -286,7 +331,7 @@ export default {
     onCancel() {
       this.$router.push({ path: "/home" });
     },
-    onSubmit() {
+    async onSubmit() {
       // TODO: sumit upload_entry first, then
       // in its callback, POST all the picks
       const self = this;
@@ -294,8 +339,7 @@ export default {
       entryform.append("token", this.$store.state.token);
       entryform.append("picture", this.lookImgSrc);
       console.log("> UPLOAD_INFO: this.lookImgSrc = ", this.lookImgSrc);
-      entryform.append("description", this.description + 
-             " #" +this.tags.join(" #") + " #" + this.idolNames.join(" #")); 
+      entryform.append("description", this.description); 
       const totalPicks = this.picks.length;
 
       $.ajax({
@@ -311,8 +355,23 @@ export default {
           if (resjson.success == true) { 
           console.log("> UploadEntry Success:  entryId = ", resjson.entryId);   
 
-          var successUploadedPick = 0;
 
+          
+          // upload hashtag
+          for (var i = 0; i < self.tags.length; i++) {
+             self.$http.get(self.setHashTagAPI, {
+              params: {
+                hashName: self.tags[i],
+                entryId: resjson.entryId
+              }
+            }); 
+          }
+
+         
+          
+          
+          // uploading pick item
+          var successUploadedPick = 0;
           for (var i = 0; i < self.picks.length; i++) {
             var pickform = new FormData();
             pickform.append("category", self.picks[i].Category);
@@ -365,9 +424,10 @@ export default {
       });
     },
     onAddItem() {
+
       this.picks.push({
         Brand: "请填写品牌",
-        IdolName: this.picks[this.picks.length - 1].IdolName,
+        IdolName: "Defalut",
         Price: "0",
         OfficialLink: "default.com",
         EntryName: "NewEntry",
@@ -378,6 +438,7 @@ export default {
           left: 0
         }
       });
+      this.chosenTabIndex = this.picks.length-1;
     },
     onDragingEnd(e) {
       const ptcon = document.querySelector("#photo-inner-container");
@@ -573,17 +634,20 @@ footer {
   height: auto;
   flex: 10;
   position: relative;
-  margin-top:5%;
+  /* margin-top:5%; */
 }
 #photo-inner-container {
-  width: 100%;
+  /* width: 100%; */
+  width: 400px;
+  margin: auto;
   /* height:100%; */
   position: relative;
   height: 300px;
 }
 #photo-container img {
   margin: auto;
-  height: 100%;
+  max-height: 300px;
+  max-width: 100%;
 }
 .active {
   background-color: darkturquoise;
@@ -649,9 +713,12 @@ header {
   vertical-align: top;
   line-height: 14px;
 }
+#tag-container{
+  text-align: left;
+}
 #tag-container ul {
   padding: 8px;
-  margin-top: 30px;
+  margin-top: 5px;
   text-align: left;
 }
 #tag-container ul li {
@@ -726,13 +793,28 @@ header {
 }
 .delete-item-button {
   font-weight: bold;
+  margin-left: 25px;
   /* font-size: 10px; */
-  padding-left: 25px;
 }
 .delete-item-button:hover {
   color:red;
 }
 .el-textarea__inner {
   height:100%;
+}
+input:checked + span{
+  /* background-color: darkcyan; */
+  font-weight: bold;
+}
+#add-tag-input{
+
+    border: 1px solid lightgrey;
+    padding: 11px;
+    border-radius: 10px;
+    margin-left: 8px;
+
+}
+.delete-tag-button{
+  color:coral;
 }
 </style>

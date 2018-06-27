@@ -12,9 +12,7 @@
             </li>
             <li><div style="margin:auto;"><i id="upload-button" v-on:click="onUploadClick" class="el-icon-plus icon"></i>  </div> </li>
             <li><div id="username-label">{{$store.state.username}}</div> </li>
-
             <li> <img id="logout-icon" @click="onLogOut()" src="/static/exit.png"></img>   </li>
-
         </ul>
       </header>
       <div class="feed-container" v-for="(feed, index) in feeds">
@@ -33,7 +31,7 @@
               <a class="tag" v-for="t in feed.PickEntries" 
               :style="{top: t.tagY + 'px', left: t.tagX + 'px'}"
               @click="onClickTag(t)"
-                > <span >{{t.Content}} </span></a>
+                > <span >{{t.tagContent}} </span></a>
             
           </div>
           <div class="icon-container">
@@ -51,7 +49,7 @@
           <div class="social-container">
             <div class="description-container">
               <span class="description-user">{{feed.Username}}</span>{{feed.Description}}
-              <span v-for="tag in feed.Tags" class="tag-span">#{{tag}}</span>
+              <span v-for="tag in feed.hashTags" class="tag-span"><a>#{{tag}}</a></span>
             </div>
             <div class="social-counter">
               <div>
@@ -65,14 +63,15 @@
               </div>
                 <div class="comments-container">
                     <ul>
-                        <li v-for="(cmt, index) in feed.Comments" v-if="index<3" class="cmts">
+                        <li v-for="(cmt, index) in feed.Comments" 
+                         class="cmts">
                        <span>{{cmt.username}}</span> {{cmt.content}} 
                        <!-- <span class="timestamp">{{cmt.TimeStamp}}</span> -->
                         </li>
                          <li v-for="(cmt, index) in feed.SelfComments" class="cmts">
                        <span>{{cmt.User}}</span> {{cmt.Content}} 
                         </li>
-                        <span v-if="feed.Comments.length >= 3"> more ... </span>
+                        <!-- <span v-if="feed.Comments.length >= 3" @click=""> more ... </span> -->
 
                         <li class="user-send-comment"> 
                           <input placeholder="发表评论！" v-model="comments[index]"
@@ -212,7 +211,8 @@ export default {
         Tags: [],
         Comments: [],
         isBookmark: false,
-        SelfComments:[]
+        SelfComments:[],
+        hashTags:[]
 
       }
     };
@@ -313,8 +313,8 @@ export default {
           // this.$router.push({ path: "/home" });
     }
 
+    var entries = ["19","18", "17","16"];
 
-    var entries = ["19", "18","16", "14", "15"];
 
     for (var i = 0; i < entries.length; i++) {
       // check pick
@@ -339,7 +339,7 @@ export default {
       this.comments.push("");
     }
 
-    var entries = ["19","16"];
+    var entries = ["19","18", "17","16"];
     const self = this;
 
     
@@ -366,6 +366,7 @@ export default {
             feedEntry.PicturePath = res.data.entry.picture;
             feedEntry.UploadEntryID = res.data.entry.entryId;
             feedEntry.Pick = res.data.entry.likenumber;
+            feedEntry.hashTags = res.data.entry.hashTags;
             // get tags
             if (debug) console.log("> HOMEPAGE : GETTING TAGS OF ", curptr());
             return self.$http.get(self.getTagsAPI, {
@@ -516,6 +517,8 @@ li {
 }
 .tag-span {
   margin-left: 3px;
+  font-style: italic;
+  font-weight: bold;
 }
 .tag-span:hover {
   text-decoration: underline;
@@ -525,6 +528,7 @@ li {
   display: flex;
   justify-content: space-between;
   text-align: center;
+  padding-top:10px;
 }
 .judge {
   border: 1px solid lightgrey;
@@ -589,9 +593,14 @@ li {
   overflow: hidden;
   position: relative;
   height:300px;
+  width:400px;
+  margin:auto;
 }
 .img-container img {
-  height: 100%;
+  max-height:300px;
+  /* width: 100%; */
+  max-width: 100%;
+
 }
 .cnt {
   /* padding: 5px; */

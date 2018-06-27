@@ -4,9 +4,9 @@
        <a> <router-link to="/home">←</router-link></a>
        <span id="pickname">{{PickEntry.EntryName}}</span>
     </div>
-    <div id="img-container">
+    <!-- <div id="img-container">
         <img :src="PickEntry.pic"></img>
-    </div>
+    </div> -->
     <div id="info-container">
         <div v-for="(val, key) in  PickEntry" 
         v-if="EntryAlias[key] && val.length != 0">  
