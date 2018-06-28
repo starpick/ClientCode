@@ -9,6 +9,7 @@ import UploadInfo from '@/components/UploadInfo'
 import UploadShare from '@/components/UploadShare'
 import PickEntryDetail from '@/components/PickEntryDetail'
 import PickRanking from '@/components/PickRanking'
+import Setting from '@/components/Setting'
 import $ from 'jquery'
 Vue.use(Router)
 
@@ -57,6 +58,10 @@ export default new Router({
       path: '/pickranking/',
       name: 'PickRanking',
       component: PickRanking
+    }, {
+      path: '/setting/',
+      name: 'Setting',
+      component: Setting
     }
   ]
 })
