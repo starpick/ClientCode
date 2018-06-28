@@ -9,64 +9,35 @@
     <section id="ranking"> 
       <span id="ranking_title">TOP10</span>
       <section id="ranking_list">
-
-        <section class="box">
-          <section class="col_1" title="1">1</section>
-          <section class="col_2"> 用户pickstar</section>
-        </section>
-
-        <section class="box">
-          <section class="col_1" title="2">2</section>
-          <section class="col_2"> 用户pickstar</section>
-        </section>
-
-        <section class="box">
-          <section class="col_1" title="3">3</section>
-          <section class="col_2"> 用户pickstar</section>
-        </section>
-
-        <section class="box">
-          <section class="col_1" title="4">4</section>
-          <section class="col_2"> 用户pickstar</section>
-        </section>
-
-        <section class="box">
-          <section class="col_1" title="5">5</section>
-          <section class="col_2"> 用户pickstar</section>
-        </section>
-
-        <section class="box">
-          <section class="col_1" title="6">6</section>
-          <section class="col_2"> 用户pickstar</section>
-        </section>
-
-        <section class="box">
-          <section class="col_1" title="7">7</section>
-          <section class="col_2"> 用户pickstar</section>
-        </section>
-
-        <section class="box">
-          <section class="col_1" title="8">8</section>
-          <section class="col_2"> 用户pickstar</section>
-        </section>
-
-        <section class="box">
-          <section class="col_1" title="9">9</section>
-          <section class="col_2"> 用户pickstar</section>
-        </section>
-
-        <section class="box">
-          <section class="col_1" title="10">10</section>
-          <section class="col_2"> 用户pickstar</section>
-        </section>
-
+        <li v-for= "(entry, index) in entrys">
+          <section class="box">
+            <section class="col_1" :title="index">{{index+1}}</section>
+            <section class="col_2"> 
+              <img class="avatar-img" src="/static/ceo.png"></img>  
+              <a> {{entry.Username}}  {{ entry.likenumber}}</a> 
+            </section>
+          </section>
+        </li>
       </section>
     </section>
-
-
   </div>
 </template>
 
+
+<script>
+import $ from "jquery";
+export default {
+  data() {
+    return {
+      entrys: [
+        { Username: 'Baidu' , likenumber: 100},
+        { Username: 'Google' , likenumber: 99},
+        { Username: 'Taobao' , likenumber: 80}
+      ]
+    }
+  }
+};
+</script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .home-container {
@@ -94,7 +65,7 @@ input:focus {
 }
 #return {
   position:absolute;
-  top:0px;
+  top:6px;
   left:5px;
 }
 
@@ -194,23 +165,35 @@ li {
   -webkit-box-flex: 1;
   -moz-box-flex: 1;
   box-flex: 1;
-  padding: 5px 0;
+  padding: 5px 5px;
   text-align:center;
+  display: flex;
+}
+.col_1[title="0"]{ 
+  color:#fff; 
+  background-image:url(/static/r1.png); 
+  line-height:43px;
 }
 .col_1[title="1"]{ 
   color:#fff; 
-  background-image:url(/static/r1.png); 
-  line-height:38px;
+  background-image:url(/static/r2.png); 
+  line-height:43px;
 }
 .col_1[title="2"]{ 
   color:#fff; 
-  background-image:url(/static/r2.png); 
-  line-height:38px;
-}
-.col_1[title="3"]{ 
-  color:#fff; 
   background-image:url(/static/r3.png); 
-  line-height:38px;
+  line-height:43px;
 }
-
+.avatar {
+  position: absolute;
+  top:0px;
+  left:0px;
+}
+.avatar-img {
+  /* position: absolute; */
+  overflow: hidden;
+  max-width:50px;
+  margin:0 10px;
+  /* max-height:30px; */
+}
 </style>
