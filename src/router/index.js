@@ -8,6 +8,7 @@ import UploadFromCam from '@/components/UploadFromCam'
 import UploadInfo from '@/components/UploadInfo'
 import UploadShare from '@/components/UploadShare'
 import PickEntryDetail from '@/components/PickEntryDetail'
+import PickRanking from '@/components/PickRanking'
 import $ from 'jquery'
 Vue.use(Router)
 
@@ -52,6 +53,10 @@ export default new Router({
       name: 'PickEntryDetail',
       component: PickEntryDetail
 
+    }, {
+      path: '/pickranking/',
+      name: 'PickRanking',
+      component: PickRanking
     }
   ]
 })
