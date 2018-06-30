@@ -11,6 +11,7 @@ import PickEntryDetail from '@/components/PickEntryDetail'
 import PickRanking from '@/components/PickRanking'
 import Setting from '@/components/Setting'
 import Me from '@/components/Me'
+import MyFollow from '@/components/MyFollow'
 import $ from 'jquery'
 Vue.use(Router)
 
@@ -64,9 +65,13 @@ export default new Router({
       name: 'Setting',
       component: Setting
     }, {
-      path: '/me',
+      path: '/me/',
       name: 'Me',
       component: Me
+    }, {
+      path: '/myfollow/',
+      name: 'MyFollow',
+      component: MyFollow
     }
   ]
 })
