@@ -38,8 +38,8 @@
                     
                 </li>
                 <li>
-                    <div class="username"> Light </div>
-                    <!-- <div class="username"> {{$store.state.username}} </div> -->
+                    <!-- <div class="username"> Light </div> -->
+                    <div class="username" @click="modifyUserName()"> {{$store.state.username}} </div>
                 </li>
                 <li>
                     <!-- <div id="userIntro"> {{$store.state.intro}} </div> -->
@@ -58,7 +58,7 @@
                     </div>
                 </li>
                 <li>
-                    <div id="my-follow">
+                    <div id="my-follow" @click="toMyFollow()">
                         <!-- <p> {{$store.state.username}} </p> -->
                         <div> 123 </div>
                         <div>Follow</div>
@@ -113,7 +113,7 @@
         name: "Me",
         data() {
             return {
-
+                edit_user_infoAPI: "http://127.0.0.1:8000/starpick/edit_user_info"
             }
         },
         methods: {
@@ -130,8 +130,16 @@
             },
             toMeInfo() {
                 this.$router.push({ path: "/me" });
-            },modifyAvatar() {
+            },
+            modifyAvatar() {
                 console.log("test modify avatar!");
+            },
+            modifyUserName() {
+                console.log("test modify username!");
+            },
+            toMyFollow() {
+                console.log("test router myfollow!");
+                this.$router.push({ path: "/myfollow" });
             },
             toAlbums() {
                 // this.$router.push({ path: "/albums" });
@@ -160,7 +168,7 @@ li {
   /* border: 1px dashed lightgray; */
 }
 header {
-    background-color: #CDDEDC;
+    /*background-color: #CDDEDC;*/
     /* position:fixed; */
     width:100%;
     z-index: 100;
