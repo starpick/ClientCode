@@ -2,7 +2,7 @@
   <div id="home-container">
     <header>
       <div id='return'>
-        <router-link to="/home"><img src="/static/return.png"></img></router-link>
+        <router-link to="/me"><img src="/static/return.png"></img></router-link>
       </div>
       <div id='settings'>Settings</div>
     </header>
