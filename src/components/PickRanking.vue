@@ -9,13 +9,30 @@
     <section id="ranking"> 
       <span id="ranking_title">TOP10</span>
       <section id="ranking_list">
-        <li v-for= "(entry, index) in entrys">
+        <li v-for="(entry, index) in entries">
           <section class="box">
             <section class="col_1" :title="index">{{index+1}}</section>
-            <section class="col_2"> 
-              <img class="avatar-img" src="/static/ceo.png"></img>  
-              <a> {{entry.Username}}  {{ entry.likenumber}}</a> 
-            </section>
+            <ul class="col_2"> 
+              <li>
+              <img class="avatar-img" :src="entry.picture"></img>  
+
+              </li>
+              <!-- <li style="flex:3;" >
+                <span v-for="t in entry.hashTags" > {{t}}  </span>
+              </li> -->
+              <li>
+                <a> {{entry.Username}}  </a>
+
+              </li>
+              <li style="flex:5;">
+                  {{entry.description}}  
+
+              </li>
+              <li>
+                <span class="likenumber-label"> Picks: </span> {{ entry.likenumber}}</a> 
+
+              </li>
+            </ul>
           </section>
         </li>
       </section>
@@ -29,12 +46,59 @@ import $ from "jquery";
 export default {
   data() {
     return {
-      entrys: [
-        { Username: 'Baidu' , likenumber: 100},
-        { Username: 'Google' , likenumber: 99},
-        { Username: 'Taobao' , likenumber: 80}
+      entriesAPI:"http://127.0.0.1:8000/starpick/get_entry_by_likeN",
+      entryAPI:"http://127.0.0.1:8000/starpick/get_entry",
+//       {
+//     "success": true,
+//     "entries": [
+//         {
+//             "entryId": 9,
+//             "picture": "http://127.0.0.1:8000/admin/starpick/entry/",
+//             "description": "da1hkd@1.cosm",
+//             "likenumber": 2,
+//             "dissnumber": 1,
+//             "hashTags": [],
+//             "userId": 10
+//         }
+//     ]
+// }
+      entries: [
+        
       ]
     }
+  },
+  async mounted() {
+    const self = this;
+    await this.$http.get(this.entriesAPI, {
+      params:{
+        numLimit: 10
+      }
+    }).then(
+      (res) => {
+        self.entries = res.data.entries;
+
+        for (var i = 0; i < res.data.entries.length; i++ ) {
+          var e = res.data.entries[i];
+           this.$http.get(
+            this.entryAPI, {
+              params: {
+                entryId: e.entryId
+              }
+            }
+          ).then(
+
+            (function(i){
+              return (res) => {
+                // console.log("> RANK: entry = ", res.data.entry);
+                self.entries[i].description = res.data.entry.description;
+                };
+            })(i)
+          );
+        }
+      }
+    );
+
+
   }
 };
 </script>
@@ -167,6 +231,7 @@ li {
   box-flex: 1;
   padding: 5px 5px;
   text-align:center;
+  margin:0;
   display: flex;
 }
 .col_1[title="0"]{ 
@@ -193,7 +258,22 @@ li {
   /* position: absolute; */
   overflow: hidden;
   max-width:50px;
-  margin:0 10px;
+  margin:auto;
   /* max-height:30px; */
+}
+ul{
+  display: flex;
+  height: 100%;
+
+}
+ul li{
+  margin:auto;
+
+  flex:1;
+} 
+.likenumber-label{
+  color: lightcyan;
+  font-weight: bold;
+
 }
 </style>

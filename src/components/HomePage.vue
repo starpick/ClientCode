@@ -5,13 +5,16 @@
        <ul>
             <li id="logo-img-container"> 
                   <img id="logo-img" src="/static/logo.png"></img> 
-           </li>
-             <li id="search-bar">
+            </li>
+            <li id="search-bar">
                <!-- <i id="search-icon" class="el-icon-search  "></i> -->
                 <input placeholder="发现新的Pick..." > </input>
             </li>
+            <li>
+              <router-link id="ranking-link" to="/pickranking">榜</router-link>
+            </li>
             <li><div style="margin:auto;"><i id="upload-button" v-on:click="onUploadClick" class="el-icon-plus icon"></i>  </div> </li>
-            <li><div id="username-label">{{$store.state.username}}</div> </li>
+            <li><div id="username-label"> <router-link to="/setting">{{$store.state.username}}</router-link></div> </li>
             <li> <img id="logout-icon" @click="onLogOut()" src="/static/exit.png"></img>   </li>
         </ul>
       </header>
@@ -98,8 +101,11 @@ export default {
       getLikesAPI: "http://127.0.0.1:8000/starpick/get_likes",
       addLikeAPI: "http://127.0.0.1:8000/starpick/like",
       addUnlikeAPI: "http://127.0.0.1:8000/starpick/unlike",
+      addDissAPI: "http://127.0.0.1:8000/starpick/diss",
+      addUnDissAPI: "http://127.0.0.1:8000/starpick/undiss",
       addCommentAPI: "http://127.0.0.1:8000/starpick/comment/makecomment",
       queryPickAPI:"http://127.0.0.1:8000/starpick/query_like",
+      queryDissAPI:"http://127.0.0.1:8000/starpick/query_diss",
       config: {
         headers: {
           "Content-Type": "multipart/form-data" //之前说的以表单传数据的格式来传递fromdata
@@ -236,34 +242,59 @@ export default {
       this.$router.push({ path: "/" });
     },
     onPick(id) {
-      // console.log(id)
-      var inpick = this.UserInfo.UserDiss.indexOf(id);
-      this.$http.get(this.addLikeAPI, {
-        params: {
-          token: this.$store.state.token,
-          entryId: id
-        }
-      });
-      if (inpick != -1) {
-        this.UserInfo.UserDiss.splice(inpick, 1);
+      var inpick = -1;
+      if (this.UserInfo.UserPick.length > 0) {
+       inpick = this.UserInfo.UserPick.indexOf(id);
       }
-      if (this.UserInfo.UserPick.indexOf(id) == -1) {
+      
+      if (inpick == -1) {
+        this.$http.get(this.addLikeAPI, {
+          params: {
+            token: this.$store.state.token,
+            entryId: id
+          }
+        });
         this.UserInfo.UserPick.push(id);
-      }
-    },
-    onDiss(id) {
-      var inpick = this.UserInfo.UserPick.indexOf(id);
-      this.$http.get(this.addUnlikeAPI, {
-        params: {
-          token: this.$store.state.token,
-          entryId: id
-        }
-      });
-      if (inpick != -1) {
+        
+      } else {
+        this.$http.get(this.addUnLikeAPI, {
+          params: {
+            token: this.$store.state.token,
+            entryId: id
+          }
+        });
         this.UserInfo.UserPick.splice(inpick, 1);
       }
-      if (this.UserInfo.UserDiss.indexOf(id) == -1) {
+      
+    },
+    onDiss(id) {
+      
+      var inpick = -1;
+      if (this.UserInfo.UserDiss.length > 0) {
+       inpick = this.UserInfo.UserDiss.indexOf(id);
+      }
+      
+
+      if (inpick != -1) {
+        this.UserInfo.UserDiss.splice(inpick, 1);
+
+        this.$http.get(this.addUnDissAPI, {
+          params: {
+            token: this.$store.state.token,
+            entryId: id
+          }
+        });
+      } else {
         this.UserInfo.UserDiss.push(id);
+
+
+        this.$http.get(this.addDissAPI, {
+          params: {
+            token: this.$store.state.token,
+            entryId: id
+          }
+        });
+
       }
     },
     isPicked(id) {
@@ -325,15 +356,26 @@ export default {
         }
       }).then(res =>{
         if (res.data.success) {
-          if(res.data.like) this.UserInfo.UserPick.push( parseInt(entries[i]) );
-          else this.UserInfo.UserDiss.push( parseInt(entries[i]) );
+          if (res.data.like == true) this.UserInfo.UserPick.push( parseInt(entries[i]) );
+        }
+      });
+
+      await this.$http.get(this.queryDissAPI, {
+        params: {
+          email: this.$store.state.email,
+          entryId: entries[i]
+        }
+      }).then(res =>{
+        if (res.data.success) {
+          if(res.data.diss == true) this.UserInfo.UserDiss.push( parseInt(entries[i]) );
+          // else this.UserInfo.UserDiss.push( parseInt(entries[i]) );
         }
       });
 
     }
   },
   async mounted() {
-    const debug = !false;
+    const debug = false;
     console.log(this.$store.state);
     for (var i = 0; i < this.feeds.length; i++) {
       this.comments.push("");
@@ -740,5 +782,14 @@ li {
 
 }
 
+li a{
+  text-decoration:none;
+  color:lightcyan;
+}
+#ranking-link {
+  margin:auto;
+  font-size: 20px;
+  font-weight: bold;
+}
 
 </style>
