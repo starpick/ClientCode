@@ -10,10 +10,14 @@
                <!-- <i id="search-icon" class="el-icon-search  "></i> -->
                 <input placeholder="发现新的Pick..." > </input>
             </li>
+
             <li>
               <router-link id="ranking-link" to="/pickranking">榜</router-link>
             </li>
             <li><div style="margin:auto;"><i id="upload-button" v-on:click="onUploadClick" class="el-icon-plus icon"></i>  </div> </li>
+            <li>
+              <img id="me-icon" @click="toMeInfo()" src="/static/me.png"></img>
+            </li>
             <li><div id="username-label"> <router-link to="/setting">{{$store.state.username}}</router-link></div> </li>
             <li> <img id="logout-icon" @click="onLogOut()" src="/static/exit.png"></img>   </li>
         </ul>
@@ -240,6 +244,9 @@ export default {
     onLogOut() {
       this.$store.commit("userLogout");
       this.$router.push({ path: "/" });
+    },
+    toMeInfo() {
+      this.$router.push({ path: "/me" });
     },
     onPick(id) {
       var inpick = -1;
@@ -527,6 +534,11 @@ margin:auto;
   margin: 10px;
   
   width: auto;
+}
+#me-icon {
+    margin-top:5px;
+    width: 30px;
+    height: 30px;
 }
 header li {
   flex: 1;
