@@ -18,7 +18,11 @@
             <li>
               <img id="me-icon" @click="toMeInfo()" src="/static/me.png"></img>
             </li>
-            <li><div id="username-label"> <router-link to="/setting">{{$store.state.username}}</router-link></div> </li>
+            <li>
+              <div id="username-label"> 
+                <a 
+                @click="onClickUserName( $store.state.id )" >{{$store.state.username}}</a>
+              </div> </li>
             <li> <img id="logout-icon" @click="onLogOut()" src="/static/exit.png"></img>   </li>
         </ul>
       </header>
@@ -29,7 +33,8 @@
               <img class="avatar-img" src="/static/ceo.png"></img>
             </div>
           </div>
-            <div class="username"> Username{{feed.User}}</div>
+            <div class="username" @click="onClickUserName( feed.user.id )">  
+              {{feed.user.username}}</div>
             <div  > debug: {{feed.UploadEntryID}}</div>
           </div>
           <div class="img-container">
@@ -98,6 +103,7 @@ export default {
   name: "HomePage",
   data() {
     return {
+      getfollowings: "http://127.0.0.1:8000/starpick/follow/getfollowings",
       getEntryAPI: "http://127.0.0.1:8000/starpick/get_entry",
       getTagsAPI: "http://127.0.0.1:8000/starpick/get_tags",
       getPickAPI: "http://127.0.0.1:8000/starpick/get_pick",
@@ -108,8 +114,10 @@ export default {
       addDissAPI: "http://127.0.0.1:8000/starpick/diss",
       addUnDissAPI: "http://127.0.0.1:8000/starpick/undiss",
       addCommentAPI: "http://127.0.0.1:8000/starpick/comment/makecomment",
-      queryPickAPI:"http://127.0.0.1:8000/starpick/query_like",
-      queryDissAPI:"http://127.0.0.1:8000/starpick/query_diss",
+      queryPickAPI: "http://127.0.0.1:8000/starpick/query_like",
+      queryDissAPI: "http://127.0.0.1:8000/starpick/query_diss",
+      getUserAPI: "http://127.0.0.1:8000/starpick/get_user",
+      getUserFeedAPI: "http://127.0.0.1:8000/starpick/get_user_entries",
       config: {
         headers: {
           "Content-Type": "multipart/form-data" //之前说的以表单传数据的格式来传递fromdata
@@ -221,13 +229,20 @@ export default {
         Tags: [],
         Comments: [],
         isBookmark: false,
-        SelfComments:[],
-        hashTags:[]
-
+        SelfComments: [],
+        hashTags: []
       }
     };
   },
   methods: {
+    onClickUserName(id) {
+      this.$router.push({
+        path: "/me/",
+        query: {
+          userId: id
+        }
+      });
+    },
     onClickTag(pickentry) {
       console.log(pickentry);
       this.$router.push({
@@ -251,9 +266,9 @@ export default {
     onPick(id) {
       var inpick = -1;
       if (this.UserInfo.UserPick.length > 0) {
-       inpick = this.UserInfo.UserPick.indexOf(id);
+        inpick = this.UserInfo.UserPick.indexOf(id);
       }
-      
+
       if (inpick == -1) {
         this.$http.get(this.addLikeAPI, {
           params: {
@@ -262,7 +277,6 @@ export default {
           }
         });
         this.UserInfo.UserPick.push(id);
-        
       } else {
         this.$http.get(this.addUnLikeAPI, {
           params: {
@@ -270,17 +284,15 @@ export default {
             entryId: id
           }
         });
-        this.UserInfo.UserPick.splice(inpick, 1);
+        console.log("> HOME_PAGE: ", this.UserInfo.UserPick);
+        this.UserInfo.UserPick[inpick] = -1;
       }
-      
     },
     onDiss(id) {
-      
       var inpick = -1;
       if (this.UserInfo.UserDiss.length > 0) {
-       inpick = this.UserInfo.UserDiss.indexOf(id);
+        inpick = this.UserInfo.UserDiss.indexOf(id);
       }
-      
 
       if (inpick != -1) {
         this.UserInfo.UserDiss.splice(inpick, 1);
@@ -294,14 +306,12 @@ export default {
       } else {
         this.UserInfo.UserDiss.push(id);
 
-
         this.$http.get(this.addDissAPI, {
           params: {
             token: this.$store.state.token,
             entryId: id
           }
         });
-
       }
     },
     isPicked(id) {
@@ -322,13 +332,13 @@ export default {
       this.$http
         .post(this.addCommentAPI, form, this.config)
         .then(res => {
-          if (res.data.success) { 
+          if (res.data.success) {
           } else {
             alert("(。・＿・。)ﾉI’m sorry~发送评论失败！");
           }
         })
         .catch(err => {
-          console.log("> HOMEPAGE: Fail send comments\n", err)
+          console.log("> HOMEPAGE: Fail send comments\n", err);
         });
 
       // update view immediately
@@ -342,57 +352,154 @@ export default {
   },
   async beforeMount() {
     if (localStorage.username !== undefined) {
-          this.$store.commit("userLogin", {
-            token: localStorage.token,
-            id: localStorage.id,
-            email: localStorage.email,
-            username: localStorage.username
-          });
-          // this.$router.push({ path: "/home" });
-    }
-
-    var entries = ["19","18", "17","16"];
-
-
-    for (var i = 0; i < entries.length; i++) {
-      // check pick
-      await this.$http.get(this.queryPickAPI, {
-        params: {
-          email: this.$store.state.email,
-          entryId: entries[i]
-        }
-      }).then(res =>{
-        if (res.data.success) {
-          if (res.data.like == true) this.UserInfo.UserPick.push( parseInt(entries[i]) );
-        }
+      this.$store.commit("userLogin", {
+        token: localStorage.token,
+        id: localStorage.id,
+        email: localStorage.email,
+        username: localStorage.username
       });
-
-      await this.$http.get(this.queryDissAPI, {
-        params: {
-          email: this.$store.state.email,
-          entryId: entries[i]
-        }
-      }).then(res =>{
-        if (res.data.success) {
-          if(res.data.diss == true) this.UserInfo.UserDiss.push( parseInt(entries[i]) );
-          // else this.UserInfo.UserDiss.push( parseInt(entries[i]) );
-        }
-      });
-
+      // this.$router.push({ path: "/home" });
     }
   },
+
+  getEntrieIdList() {},
   async mounted() {
-    const debug = false;
+    // get all users-> get entries of
+    const debug = !false;
     console.log(this.$store.state);
     for (var i = 0; i < this.feeds.length; i++) {
       this.comments.push("");
     }
 
-    var entries = ["19","18", "17","16"];
+    var followusers = [];
+    var entries = [];
     const self = this;
+
+    this.$http
+      .get(this.getfollowings, {
+        params: {
+          id: this.$store.state.id
+        }
+      })
+      .then(res => {
+        // better：并行 promise
+        var prms = [];
+        for (var i = 0; i < res.data.follows.length; i++) {
+          followusers.push(res.data.follows[i].email);
+          prms.push(
+            self.$http.get(this.getUserFeedAPI, {
+              params: {
+                email: res.data.follows[i].email
+              }
+            })
+          );
+
+          // .then(res => {
+          //   console.log(res.data);
+          //   res.data.entry.forEach(e => {
+          //     entries.push(e.entryId);
+          //   });
+
+          // })
+        }
+
+        Promise.all(prms)
+          .then(results => {
+            results.forEach(res => {
+              console.log(res.data);
+              res.data.entry.forEach(e => {
+                var entryId = e.entryId;
+                entries.push(entryId);
+                var feedEntry = JSON.parse(JSON.stringify(self.emptyFeed));
+                feedEntry.Description = e.description;
+                feedEntry.PicturePath = e.picture;
+                feedEntry.UploadEntryID = e.entryId;
+                feedEntry.Pick = e.likenumber;
+                feedEntry.hashTags = e.hashTags;
+                feedEntry.user = e.user;
+                feedEntry.PickEntries = e.tags;
+                self.feeds.push(feedEntry);
+              });
+            });
+          })
+          .then(res => {
+            var pickPromises = [];
+            var dissPromises = [];
+            var cmtsPromises = [];
+
+              for (var i = 0; i < entries.length; i++) {
+                  // check pick
+                  pickPromises.push(this.$http
+                    .get(this.queryPickAPI, {
+                      params: {
+                        email: this.$store.state.email,
+                        entryId: entries[i]
+                      }
+                    })); 
+                    // .then(res => {
+                    //   if (res.data.success) {
+                    //     if (res.data.like == true)
+                    //       this.UserInfo.UserPick.push(parseInt(entries[i]));
+                    //   }
+                    // });
+
+                cmtsPromises.push(self.$http.get(self.getCommentsAPI, {
+                  params: {
+                    entryId: entries[i]
+                  }
+                })); 
+
+                  dissPromises.push(this.$http
+                    .get(this.queryDissAPI, {
+                      params: {
+                        email: this.$store.state.email,
+                        entryId: entries[i]
+                      }
+                    })); 
+                    // .then(res => {
+                    //   if (res.data.success) {
+                    //     if (res.data.diss == true) {
+                    //       this.UserInfo.UserDiss.push(parseInt(entries[i]));
+                    //     }
+                    //     // else this.UserInfo.UserDiss.push( parseInt(entries[i]) );
+                    //   }
+                    // });
+                }
+
+
+                Promise.all(cmtsPromises).then(results=>{
+                  results.forEach((res, i) => {
+                    if (res.data.success) {
+                      self.feeds[i].Comments = res.data.comments;
+                    }
+                  });
+                });
+
+                Promise.all(pickPromises).then(results=>{
+                  results.forEach((res, i) => {
+                     if (res.data.success) {
+                        if (res.data.like == true)
+                          self.UserInfo.UserPick.push(parseInt(entries[i]));
+                      }
+                  });
+                });
+
+                Promise.all(dissPromises).then(results=>{
+                  results.forEach((res, i) => {
+                    if (res.data.success) {
+                        if (res.data.diss == true) {
+                          self.UserInfo.UserDiss.push(parseInt(entries[i]));
+                        }
+                    }
+                  });
+                });
+          });
+      });
 
     
 
+    // -------------------------------------
+    /*
     for (var i = 0; i < entries.length; i++) {
       var feedEntry = JSON.parse(JSON.stringify(self.emptyFeed));
       //  get feed entry
@@ -416,8 +523,12 @@ export default {
             feedEntry.UploadEntryID = res.data.entry.entryId;
             feedEntry.Pick = res.data.entry.likenumber;
             feedEntry.hashTags = res.data.entry.hashTags;
+            feedEntry.user = res.data.entry.user;
+
             // get tags
             if (debug) console.log("> HOMEPAGE : GETTING TAGS OF ", curptr());
+
+
             return self.$http.get(self.getTagsAPI, {
               params: {
                 entryId: entries[curptr()]
@@ -456,6 +567,7 @@ export default {
           feedEntry.Comments = res.data.comments;
           self.feeds.push(feedEntry);
           if (debug) console.log("> HOMEPAGE: Add feed: ", feedEntry);
+          
         })
         .catch(err => {
           if (debug) console.log(
@@ -466,6 +578,7 @@ export default {
           );
         });
     }
+    */
     console.log("> HOME_PAGE: picks = ", this.UserInfo.UserPick);
   }
 };
@@ -476,7 +589,7 @@ export default {
 #home-container {
   width: 100%;
   height: 100%;
-  overflow:auto;
+  overflow: auto;
 }
 div,
 li {
@@ -485,7 +598,7 @@ li {
 header {
   background-color: darkturquoise;
   /* position:fixed; */
-  width:100%;
+  width: 100%;
   z-index: 100;
 }
 input:focus {
@@ -525,20 +638,20 @@ header li div {
 #search-icon {
   /* flex: 0.5; */
   padding: 4%;
-margin:auto;
+  margin: auto;
   background: lightcyan;
   border-radius: 100px;
 }
 
 #search-bar input {
   margin: 10px;
-  
+
   width: auto;
 }
 #me-icon {
-    margin-top:5px;
-    width: 30px;
-    height: 30px;
+  margin-top: 5px;
+  width: 30px;
+  height: 30px;
 }
 header li {
   flex: 1;
@@ -559,7 +672,7 @@ li {
   padding: 5px;
   margin-left: 21px;
   font-weight: bold;
-  color:darkcyan;
+  color: darkcyan;
 }
 .description-container {
   padding: 10px 20px;
@@ -582,13 +695,12 @@ li {
   display: flex;
   justify-content: space-between;
   text-align: center;
-  padding-top:10px;
+  padding-top: 10px;
 }
 .judge {
   border: 1px solid lightgrey;
   padding: 2px 13px;
   border-radius: 100px;
-
 }
 
 .pick {
@@ -597,14 +709,13 @@ li {
 .ispick {
   border: none;
   /* background-color: rgb(255, 0, 128); */
-   width: 20px;
+  width: 20px;
   background-image: url(/static/redheart.png);
   background-size: 25px 25px;
   background-repeat: no-repeat;
   background-position: 0px 2px;
 }
 
- 
 .diss {
   background-color: lightgrey;
 }
@@ -646,15 +757,14 @@ li {
 .img-container {
   overflow: hidden;
   position: relative;
-  height:300px;
-  width:400px;
-  margin:auto;
+  height: 300px;
+  width: 400px;
+  margin: auto;
 }
 .img-container img {
-  max-height:300px;
+  max-height: 300px;
   /* width: 100%; */
   max-width: 100%;
-
 }
 .cnt {
   /* padding: 5px; */
@@ -712,7 +822,6 @@ li {
 .icon {
   background: lightcyan;
   border-radius: 100px;
-
 }
 #upload-button:after {
   /* 点击后的状态 */
@@ -756,7 +865,7 @@ li {
   margin: auto;
 }
 #username-label {
-  color:lightcyan;
+  color: lightcyan;
   font-weight: bold;
 }
 
@@ -771,37 +880,34 @@ li {
 }
 .avatar {
   position: absolute;
-  top:0px;
-  left:0px;
+  top: 0px;
+  left: 0px;
 }
 .avatar-img {
   /* position: absolute; */
   overflow: hidden;
   border-radius: 150px;
 
-  max-width:50px;
+  max-width: 50px;
   /* max-height:30px; */
 }
 .info-container {
-  border-bottom:1px darkcyan dashed;
+  border-bottom: 1px darkcyan dashed;
   /* border-top:1px darkcyan dashed; */
-
 }
 .feed-container {
   /* margin-top: 50px; */
-  border-bottom:1px darkcyan dashed;
-  border-top:1px darkcyan dashed;
-
+  border-bottom: 1px darkcyan dashed;
+  border-top: 1px darkcyan dashed;
 }
 
-li a{
-  text-decoration:none;
-  color:lightcyan;
+li a {
+  text-decoration: none;
+  color: lightcyan;
 }
 #ranking-link {
-  margin:auto;
+  margin: auto;
   font-size: 20px;
   font-weight: bold;
 }
-
 </style>

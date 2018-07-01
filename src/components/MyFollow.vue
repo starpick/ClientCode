@@ -39,7 +39,7 @@
             <div class="follow-list" v-for="(follow, index) in follows">
                 <div class="follow-info">
                     <div class="follow-avatar">
-                        <img class="avatar-img" src="/static/light.png">
+                        <img class="avatar-img" :src="follow.header">
                     </div>
                     <div class="follow-username" @click="toFollowUser()">
                         {{follow.username}}
@@ -65,6 +65,8 @@
         name: "MyFollow",
         data() {
             return {
+                getfollowings:"http://127.0.0.1:8000/starpick/follow/getfollowings",
+
                 // follows: []
                 follows: [
                     {
@@ -82,6 +84,16 @@
 
                 ]
             }
+        },
+        mounted(){
+            const self = this;
+            this.$http.get(this.getfollowings, {
+                params:{
+                    id:this.$store.state.id
+                }
+            }).then(res=>{
+                self.follows = res.data.follows;
+            });
         },
         methods: {
             toHome() {

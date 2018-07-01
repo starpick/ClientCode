@@ -15,10 +15,10 @@
                     </div>
                 </li>
                 <li>
-                    <div id="username-label">{{$store.state.username}}</div> 
+                    <div id="username-label">{{$store.state.username }}</div> 
                 </li>
-                <li>
-                    <img id="me-icon" @click="toMeInfo()" src="/static/me.png"></img>
+                <li  @click="toMeInfo()" >
+                    <img id="me-icon" src="/static/me.png"></img>
                 </li>
                 <li>
                     <img id="logout-icon" @click="onLogOut()" src="/static/exit.png"></img>
@@ -33,17 +33,29 @@
             <ul>
                 <li>
                     <div id="avatar-box">
-                        <img id="me-avatar" src="/static/light.png" @click="modifyAvatar()"></img>
+                        <img id="me-avatar" :src="user.header" @click="modifyAvatar()"></img>
                     </div>
                     
                 </li>
                 <li>
                     <!-- <div class="username"> Light </div> -->
-                    <div class="username" @click="modifyUserName()"> {{$store.state.username}} </div>
+                    <div class="username" @click="modifyUserName()">   {{user.username}} </div>
+                    <div class="email" >   {{user.email}} </div>
                 </li>
                 <li>
                     <!-- <div id="userIntro"> {{$store.state.intro}} </div> -->
-                    <div id="userIntro"> Intro:Pick plmm </div>
+                    <!-- <div id="userIntro"> Intro:Pick plmm </div> -->
+                    <div v-if="$store.state.username != user.username">
+                         <el-button type="primary" 
+                            v-if="!followThisUser "
+                         @click="onFollow(user.id)" >Follow</el-button>
+                         <el-button type="danger" 
+                         v-if=" followThisUser"
+
+                         @click="onUnFollow(user.id)" >UnFollow</el-button>
+                         <!-- <el-button type="primary" v-if>Follow</el-button> -->
+
+                    </div>
                 </li>
             </ul>
 
@@ -51,23 +63,23 @@
 
             <ul id="my-count">
                 <li>
-                    <div id="my-entry" class="count">
+                    <div id="my-entry" class="count"  @click="toPick()">
                         <!-- <p> {{$store.state.username}} </p> -->
-                        <div> 628 </div>
+                        <div> 8 </div>
                         <div>StarPick</div>
                     </div>
                 </li>
                 <li>
                     <div id="my-follow" @click="toMyFollow()">
                         <!-- <p> {{$store.state.username}} </p> -->
-                        <div> 123 </div>
+                        <div> {{followLength}} </div>
                         <div>Follow</div>
                     </div>
                 </li>
                 <li>
                     <div id="my-follower">
                         <!-- <p> {{$store.state.username}} </p> -->
-                        <div> 3455 </div>
+                        <div> 5 </div>
                         <div>Follower</div>
                     </div>
                 </li>
@@ -113,10 +125,75 @@
         name: "Me",
         data() {
             return {
-                edit_user_infoAPI: "http://127.0.0.1:8000/starpick/edit_user_info"
+                followLength:0, 
+                followThisUser:false,
+                user:{},
+                follows:[],
+                getfollowings:"http://127.0.0.1:8000/starpick/follow/getfollowings",
+                followAPI:"http://127.0.0.1:8000/starpick/follow/follow",
+                unfollowAPI:"http://127.0.0.1:8000/starpick/follow/unfollow",
+                getUserAPI:"http://127.0.0.1:8000/starpick/get_user",
+                edit_user_infoAPI: "http://127.0.0.1:8000/starpick/edit_user_info",
+            }
+        }, 
+        
+        watch: {
+            $route(to, from) {
+            
+            // 对路由变化作出响应...
             }
         },
+        mounted(){
+            this.requestForUserInfo(this.$route.query.userId);
+
+            const self = this;
+            this.$http.get(this.getfollowings, {
+                params:{
+                    id: this.$store.state.id
+                }
+            }).then(res => {
+                if (res.data.success) {
+                    self.follows = res.data.follows;
+                    console.log("> ME: ", self.$store.state.id, " follow", self.follows);
+                    self.follows.forEach(e=>{
+                        if (e.username == self.user.username){
+                            self.followThisUser = true;
+                        }
+                    });
+
+                }
+            })
+        },
+        computed:{
+            
+        },
         methods: {
+            async requestForUserInfo(id){
+                console.log(">ME ID=",id)
+                const self = this;
+                await this.$http.get(this.getUserAPI, {
+                    params: {
+                        userId: id
+                    }
+                }).then(
+                    res=>{
+                        // console.log("> ME: res.data = ",res.data);
+                        self.user = res.data;
+                        return this.$http.get(this.getfollowings, {
+                            params:{
+                                id: self.user.id
+                            }
+                        });
+                    }
+                ).then(res=>{
+                    self.user.follows = res.data.follows;
+                    self.followLength = res.data.follows.length;
+                    console.log(self.user)
+                });
+            },
+            toPick(){
+                
+            },
             toHome() {
                 this.$router.push({ path: "/home" });
             },
@@ -129,7 +206,13 @@
                 this.$router.push({ path: "/" });
             },
             toMeInfo() {
-                this.$router.push({ path: "/me" });
+                
+                this.$router.push({
+                    path: "/me/",
+                    query: {
+                     userId: this.$store.state.id
+                    }
+                });
             },
             modifyAvatar() {
                 console.log("test modify avatar!");
@@ -151,6 +234,33 @@
             },
             toSettings() {
                 this.$router.push({ path: "/setting" });
+            },
+            onFollow(id){
+                this.$http.get(this.followAPI, {
+                    params:{
+                        token:this.$store.state.token,
+                        followerId: this.user.id
+                    }
+                }).then(
+                    res=>{
+                        console.log("> ME: res.data = ", res.data);
+                    }
+                );
+                this.follows.push(id);
+                this.followThisUser = true;
+            }
+            ,
+            onUnFollow(id){
+                this.followThisUser = false;
+
+                this.follows.splice(this.follows.indexOf(id), 1);
+
+                this.$http.get(this.unfollowAPI, {
+                    params:{
+                        token: this.$store.state.token,
+                        followerId: this.user.id
+                    }
+                });
             }
 
         }
