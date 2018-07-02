@@ -2,8 +2,11 @@
     <div id="me-container">
         <header>  
             <ul>
-                <li id="logo-img-container"> 
+                <!-- <li id="logo-img-container"> 
                     <img id="logo-img" src="/static/logo.png" @click="toHome()"></img> 
+                </li> -->
+                <li>
+                    <img id="return-icon" src="/static/return_2.png" @click="toLastPage()"></img>
                 </li>
                 <li id="search-bar">
                    <!-- <i id="search-icon" class="el-icon-search  "></i> -->
@@ -17,11 +20,11 @@
                 <li>
                     <div id="username-label">{{$store.state.username }}</div> 
                 </li>
-                <li  @click="toMeInfo()" >
+                <!-- <li  @click="toMeInfo()" >
                     <img id="me-icon" src="/static/me.png"></img>
-                </li>
+                </li> -->
                 <li>
-                    <img id="logout-icon" @click="onLogOut()" src="/static/exit.png"></img>
+                    <img id="logout-icon" @click="onLogOut()" src="/static/logout.png"></img>
                 </li>
             </ul>
         </header>
@@ -63,7 +66,7 @@
 
             <ul id="my-count">
                 <li>
-                    <div id="my-entry" class="count"  @click="toPick()">
+                    <div id="my-entry" class="count"  @click="toPick( $store.state.id )">
                         <!-- <p> {{$store.state.username}} </p> -->
                         <div> 8 </div>
                         <div>StarPick</div>
@@ -192,9 +195,17 @@
                 });
             },
             toPick(){
-                
+                // this.$router.push({
+                //     path: "/mystarpick",
+                //     query: {
+                //         userId: this.$store.state.id
+                //     }
+                // });
             },
             toHome() {
+                this.$router.push({ path: "/home" });
+            },
+            toLastPage() {
                 this.$router.push({ path: "/home" });
             },
             onUploadClick() {
@@ -268,160 +279,166 @@
 </script>
 
 <style scoped>
-#me-container {
-  width: 100%;
-  height: 100%;
-  overflow:auto;
-}
-div,
-li {
-  /* border: 1px dashed lightgray; */
-}
-header {
-    /*background-color: #CDDEDC;*/
-    /* position:fixed; */
-    width:100%;
-    z-index: 100;
-    margin:0;
-    height: 51px;
-}
-input:focus {
-    outline: none;
-}
-.icon-container ul,
-.social-counter,
-.info-container,
-header {
-    /* to control the same padding-left. */
-    padding-left: 2%;
-    padding-right: 1%;
-    /* height:50px; */
-}
-header ul {
-    display: flex;
-        /*      justify-content:space-between;    */
-    margin: auto;
-    width: 100%;
-    padding: 5px 0px;
-    vertical-align: bottom;
-}
-header li {
-    display: flex;
-    width: 100%;
-}
-header li div {
-    margin: auto;
-}
-#logo-img {
-    flex: 1;
-    height: 80%;
-    width: 100%;
-    max-width: 80%;
-    border-radius: 100px;
-}
-#search-bar {
-    flex: 2;
-    display: flex;
-    text-align: center;
-    margin-left: -8px;
-    /* padding:0 5%; */
-}
-#search-icon {
-    /* flex: 0.5; */
-    padding: 4%;
-    margin:auto;
-    background: lightcyan;
-    border-radius: 100px;
-}
+    #me-container {
+      width: 100%;
+      height: 100%;
+      overflow:auto;
+    }
+    div,
+    li {
+      /* border: 1px dashed lightgray; */
+    }
+    header {
+        /*background-color: #CDDEDC;*/
+        /* position:fixed; */
+        width:100%;
+        z-index: 100;
+        margin:0;
+        height: 51px;
+    }
+    input:focus {
+        outline: none;
+    }
+    .icon-container ul,
+    .social-counter,
+    .info-container,
+    header {
+        /* to control the same padding-left. */
+        padding-left: 2%;
+        padding-right: 1%;
+        /* height:50px; */
+    }
+    header ul {
+        display: flex;
+            /*      justify-content:space-between;    */
+        margin: auto;
+        width: 100%;
+        padding: 5px 0px;
+        vertical-align: bottom;
+    }
+    header li {
+        display: flex;
+        width: 100%;
+    }
+    header li div {
+        margin: auto;
+    }
+    #logo-img {
+        flex: 1;
+        height: 80%;
+        width: 100%;
+        max-width: 80%;
+        border-radius: 100px;
+    }
+    #return-icon {
+        width: 30px;
+        height: 30px;
+        position: relative;
+        top: 5px;
+    }
+    #search-bar {
+        flex: 2;
+        display: flex;
+        text-align: center;
+        margin-left: -8px;
+        /* padding:0 5%; */
+    }
+    #search-icon {
+        /* flex: 0.5; */
+        padding: 4%;
+        margin:auto;
+        background: lightcyan;
+        border-radius: 100px;
+    }
 
-#search-bar input {
-    margin: 10px;
-    
-    width: auto;
-    /*border-radius: 5px;*/
-    /*box-shadow: none;*/
-}
-header li {
-    flex: 1;
-}
-li {
-    display: inline;
-    list-style: none;
-}
-#me-icon {
-    margin-top:5px;
-    width: 30px;
-    height: 30px;
-}
-#logout-icon {
-    height: 40px;
-    margin: auto;
-    margin-left: 0px;
-}
-.null-line {
-    width: 100%;
-    height: 10px;
-    background-color: #EEEEEE;
-}
+    #search-bar input {
+        margin: 10px;
+        
+        width: auto;
+        /*border-radius: 5px;*/
+        /*box-shadow: none;*/
+    }
+    header li {
+        flex: 1;
+    }
+    li {
+        display: inline;
+        list-style: none;
+    }
+    #me-icon {
+        margin-top:5px;
+        width: 30px;
+        height: 30px;
+    }
+    #logout-icon {
+        height: 30px;
+        margin: auto;
+        margin-left: 0px;
+    }
+    .null-line {
+        width: 100%;
+        height: 10px;
+        background-color: #EEEEEE;
+    }
 
-#my-info-container ul {
-    padding: 0;
-}
-#my-info-container li {
-    height: 10px;
-    margin: 0;
-    padding: 0;
-}
-#avatar-box {
-    border-radius: 100px;
-}
-#me-avatar {
-    /*width: 100px;
-    height: 100px;
-    border-radius: 100%;
-    border: 1px;*/
-    flex: 1;
-    height: 100px;
-    width: 100px;
-    max-width: 80%;
-    border-radius: 100px;
-}
-#my-count {
-    height: 40px;
-}
-#my-count li {
-    display: inline-flex;
-    width: 80px;
-    margin-left: 20px;
-    margin-right: 10px;
-}
-.someProfile div  {
-    /*display: inline-flex;*/
-    width: 100px;
-    margin: 0;
-    margin-top: 15px;
-    /*margin-left: 10px;*/
-    /*margin-right: 10px;*/
-    position: absolute;
-    left: 60px;
-    /*top: 15px;*/
-}
-.someProfile img {
-    /*display: inline-flex;*/
-    margin: 5px;
-    width: 30px;
-}
-.someProfile .icon {
-    display: inline-flex;
-    position: absolute;
-    left: 15px;
-    margin-top: 10px
-}
-.someProfile .next_icon {
-    height: 25px;
-    display: inline-flex;
-    margin-top: 15px;
-    margin-left: 320px;
-}
+    #my-info-container ul {
+        padding: 0;
+    }
+    #my-info-container li {
+        height: 10px;
+        margin: 0;
+        padding: 0;
+    }
+    #avatar-box {
+        border-radius: 100px;
+    }
+    #me-avatar {
+        /*width: 100px;
+        height: 100px;
+        border-radius: 100%;
+        border: 1px;*/
+        flex: 1;
+        height: 100px;
+        width: 100px;
+        max-width: 80%;
+        border-radius: 100px;
+    }
+    #my-count {
+        height: 40px;
+    }
+    #my-count li {
+        display: inline-flex;
+        width: 80px;
+        margin-left: 20px;
+        margin-right: 10px;
+    }
+    .someProfile div  {
+        /*display: inline-flex;*/
+        width: 100px;
+        margin: 0;
+        margin-top: 15px;
+        /*margin-left: 10px;*/
+        /*margin-right: 10px;*/
+        position: absolute;
+        left: 60px;
+        /*top: 15px;*/
+    }
+    .someProfile img {
+        /*display: inline-flex;*/
+        margin: 5px;
+        width: 30px;
+    }
+    .someProfile .icon {
+        display: inline-flex;
+        position: absolute;
+        left: 15px;
+        margin-top: 10px
+    }
+    .someProfile .next_icon {
+        height: 25px;
+        display: inline-flex;
+        margin-top: 15px;
+        margin-left: 320px;
+    }
 
 </style>
