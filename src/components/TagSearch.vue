@@ -30,7 +30,7 @@
               <el-card :body-style="{ padding: '0px' }">
                 <img :src="entry.picture" class="image">
                 <div style="padding: 14px;">
-                  <span>{{entry.user.username}}</span>
+                  <div id = 'search_tag_user' @click="onClickUserName(entry.user.id)">{{entry.user.username}}</div>
                   <div class="bottom clearfix">
                     <time class="time"> </time>
                     <el-button @click="Detail(entry.entryId)"type="text" class="button">详情</el-button>
@@ -156,6 +156,16 @@
                 }
               });
             },
+
+            onClickUserName(id) {
+              this.$router.push({
+                path: "/me/",
+                query: {
+                  userId: id
+                }
+              });
+
+            },
         },
 
         async beforeMount() {
@@ -186,7 +196,7 @@ li {
   /* border: 1px dashed lightgray; */
 }
 header {
-    /*background-color: #CDDEDC;*/
+    background-color: #CDDEDC;
     /* position:fixed; */
     width:100%;
     z-index: 100;
@@ -205,6 +215,7 @@ header {
     padding-right: 1%;
     /* height:50px; */
 }
+
 header ul {
     display: flex;
         /*      justify-content:space-between;    */
