@@ -2,14 +2,11 @@
     <div id="me-container">
         <header>  
             <ul>
-                <!-- <li id="logo-img-container"> 
-                    <img id="logo-img" src="/static/logo.png" @click="toHome()"></img> 
-                </li> -->
                 <li>
                     <img id="return-icon" src="/static/return_2.png" @click="toLastPage()"></img>
                 </li>
                 <li id="search-bar">
-                   <!-- <i id="search-icon" class="el-icon-search  "></i> -->
+                   <i id="search-icon" class="el-icon-search  "></i>
                     <input placeholder="发现新的Pick..." > </input>
                 </li>
                 <li>
@@ -20,9 +17,6 @@
                 <li>
                     <div id="username-label">{{$store.state.username }}</div> 
                 </li>
-                <!-- <li  @click="toMeInfo()" >
-                    <img id="me-icon" src="/static/me.png"></img>
-                </li> -->
                 <li>
                     <img id="logout-icon" @click="onLogOut()" src="/static/logout.png"></img>
                 </li>
@@ -66,23 +60,22 @@
 
             <ul id="my-count">
                 <li>
-                    <div id="my-entry" class="count"  @click="toPick( $store.state.id )">
-                        <!-- <p> {{$store.state.username}} </p> -->
-                        <div> 8 </div>
+                    <div id="my-entry" class="count"  @click="toPick( user.id )">
+                        <div> {{starpickLength}} </div>
+                        <!-- <div> 8 </div> -->
                         <div>StarPick</div>
                     </div>
                 </li>
                 <li>
-                    <div id="my-follow" @click="toMyFollow( $store.state.id )">
-                        <!-- <p> {{$store.state.username}} </p> -->
+                    <div id="my-follow" @click="toMyFollow( user.id )">
                         <div> {{followLength}} </div>
                         <div>Follow</div>
                     </div>
                 </li>
                 <li>
-                    <div id="my-follower">
-                        <!-- <p> {{$store.state.username}} </p> -->
-                        <div> 5 </div>
+                    <div id="my-follower" @click="toMyFollower( user.id )">
+                        <div> {{followerLength}} </div>
+                        <!-- <div> 5 </div> -->
                         <div>Follower</div>
                     </div>
                 </li>
@@ -132,11 +125,16 @@
                 followThisUser:false,
                 user:{},
                 follows:[],
+                starpickLength:0,
+                followers:[],
+                followerLength: 0,
                 getfollowings:"http://127.0.0.1:8000/starpick/follow/getfollowings",
                 followAPI:"http://127.0.0.1:8000/starpick/follow/follow",
                 unfollowAPI:"http://127.0.0.1:8000/starpick/follow/unfollow",
+                getUserFeedAPI: "http://127.0.0.1:8000/starpick/get_user_entries",
                 getUserAPI:"http://127.0.0.1:8000/starpick/get_user",
                 edit_user_infoAPI: "http://127.0.0.1:8000/starpick/edit_user_info",
+                getFollowersAPI: "http://127.0.0.1:8000/starpick/follow/getfollowers"
             }
         }, 
         
@@ -184,19 +182,41 @@
                         self.user = res.data;
                         return this.$http.get(this.getfollowings, {
                             params:{
-                                id: self.user.id
+                                id: self.user.id,
+                                // email: self.user.email
                             }
                         });
                     }
                 ).then(res=>{
                     self.user.follows = res.data.follows;
                     self.followLength = res.data.follows.length;
-                    console.log(self.user)
+                    // console.log(self.user)
+                    }
+                ).then(res=>{
+                    // console.log("this user", self.user);
+                    this.$http.get(this.getUserFeedAPI, {
+                        params: {
+                            email: self.user.email
+                        }
+                    }).then(results => {
+                        self.user.feeds = results.data.entry;
+                        self.starpickLength = results.data.entry.length;
+                    })
+                    }
+                ).then(res => {
+                    this.$http.get(this.getFollowersAPI, {
+                        params: {
+                            id: self.user.id
+                        }
+                    }).then(results => {
+                        self.user.followers = results.data.followers;
+                        self.followerLength = results.data.followers.length;
+                    })
                 });
             },
             toPick(id){
                 this.$router.push({
-                    path: "/mystarpick/",
+                    path: "/starpick/",
                     query: {
                         userId: id
                     }
@@ -216,14 +236,6 @@
                 this.$store.commit("userLogout");
                 this.$router.push({ path: "/" });
             },
-            toMeInfo(id) {
-                this.$router.push({
-                    path: "/me/",
-                    query: {
-                     userId: id
-                    }
-                });
-            },
             modifyAvatar() {
                 console.log("test modify avatar!");
             },
@@ -233,7 +245,16 @@
             toMyFollow(id) {
                 console.log("test router myfollow!");
                 this.$router.push({
-                    path: "/myfollow/",
+                    path: "/follow/",
+                    query: {
+                        userId: id
+                    }
+                });
+            },
+            toMyFollower( id ) {
+                console.log("test router myfollower!");
+                this.$router.push({
+                    path: "/follower/",
                     query: {
                         userId: id
                     }
@@ -362,7 +383,7 @@
         /* flex: 0.5; */
         padding: 4%;
         margin:auto;
-        background: lightcyan;
+        /*background: lightcyan;*/
         border-radius: 100px;
     }
 

@@ -1,5 +1,5 @@
  <template>
-    <div id="my-follow-container">
+    <div id="my-follower-container">
         <header>  
             <ul>
                 <li  @click="toLastPage($store.state.id)">
@@ -13,23 +13,23 @@
         <div class="null-line">
         </div>
 
-        <div id="follow-container">
+        <div id="follower-container">
             <div class="hint_text">
-                全部关注
+                全部粉丝
             </div>
             
             <hr>
 
-            <div class="follow-list" v-for="(follow, index) in follows">
-                <div class="follow-info">
-                    <div class="follow-avatar">
-                        <img class="avatar-img" :src="follow.header">
+            <div class="follower-list" v-for="(follower, index) in followers">
+                <div class="follower-info">
+                    <div class="follower-avatar">
+                        <img class="avatar-img" :src="follower.header">
                     </div>
-                    <div class="follow-username" @click="toFollowUser( follow.id )">
-                        {{follow.username}}
+                    <div class="follower-username" @click="toFollowerUser( follower.id )">
+                        {{follower.username}}
                     </div>
                     <div class="follow-state">
-                        <input type="button" value="Followed" class="followed-button" @click="changeFollowState( follow.id )"></input>
+                        <input type="button" value="Followed" class="followed-button" @click="changeFollowState( follower.id )"></input>
                         <!-- <button>Followed</button> -->
                     </div>
                    
@@ -49,12 +49,12 @@
         name: "MyFollow",
         data() {
             return {
-                getfollowings:"http://127.0.0.1:8000/starpick/follow/getfollowings",
+                getFollowersAPI: "http://127.0.0.1:8000/starpick/follow/getfollowers",
                 getUserAPI:"http://127.0.0.1:8000/starpick/get_user",
 
                 user: {},
-                // follows: []
-                follows: [
+                // followers: []
+                followers: [
                     {
                         username: "highlight",
                         email: "highlight@highlight.com"
@@ -75,33 +75,33 @@
             this.requestForUserInfo(this.$route.query.userId);
 
             // const self = this;
-            // this.$http.get(this.getfollowings, {
+            // this.$http.get(this.getFollowersAPI, {
             //     params:{
             //         id:this.$store.state.id
             //     }
             // }).then(res=>{
-            //     self.follows = res.data.follows;
+            //     self.followers = res.data.followers;
             // });
         },
         methods: {
             async requestForUserInfo(id){
-                console.log(">MyFollow ID=",id)
+                console.log(">Myfollower ID=",id)
                 const self = this;
                 await this.$http.get(this.getUserAPI, {
                     params: {
                         userId: id
                     }
                 }).then(res => {
-                    console.log("> userFollow: res.data");
+                    console.log("> userFollower: res.data");
                     self.user = res.data;
-                    return this.$http.get(this.getfollowings, {
+                    return this.$http.get(this.getFollowersAPI, {
                         params: {
                             id: self.user.id,
                             // email: self.user.email
                         }
                     });
                 }).then(results => {
-                    self.follows = results.data.follows;
+                    self.followers = results.data.followers;
                 });
             },
             toHome() {
@@ -165,7 +165,7 @@
 </script>
 
 <style scoped>
-    #my-follow-container {
+    #my-follower-container {
         width: 100%;
         height: 100%;
         overflow:auto;
@@ -185,9 +185,6 @@
     input:focus {
         outline: none;
     }
-    .icon-container ul,
-    .social-counter,
-    .info-container,
     header {
         /* to control the same padding-left. */
         padding-left: 2%;
@@ -277,13 +274,13 @@
         font: cursive;
         font-weight: bold;
     }
-    .follow-info {
+    .follower-info {
         display: inline-flex;
         position: relative;
         width: 100%;
         height: 60px;
     }
-    .follow-avatar {
+    .follower-avatar {
         margin:0;
         position: relative;
         right: -5px;
@@ -295,7 +292,7 @@
         overflow: hidden;
         border-radius: 150px;
     }
-    .follow-username {
+    .follower-username {
         text-align: left;
         position: relative;
         left: 10px;

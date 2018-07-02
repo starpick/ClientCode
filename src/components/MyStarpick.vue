@@ -4,7 +4,7 @@
             <ul>
                 <li @click="toLastPage($store.state.id)">
                     <img id="return-icon" src="/static/return_2.png" ></img>
-                    <div>Me</div>
+                    <!-- <div>Me</div> -->
                 </li>
             </ul>
         </header>
