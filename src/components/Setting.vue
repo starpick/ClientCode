@@ -1,5 +1,5 @@
 <template>
-  <div id="home-container">
+  <div id="Setting-container">
     <header>
       <div id='return'>
         <router-link to="/me"><img src="/static/return.png"></img></router-link>
@@ -15,7 +15,7 @@
       <div id='setting'> 
         <div id='item1'> Privacy</div>
         <div id='item1'> Help </div>
-        <div id='item1'> About PickStar</div>
+        <div id='item1'> About StarPick</div>
       </div>
 
       <div id='out' @click="onLogOut()"> Log out </div>

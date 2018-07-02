@@ -12,6 +12,7 @@ import PickRanking from '@/components/PickRanking'
 import Setting from '@/components/Setting'
 import Me from '@/components/Me'
 import MyFollow from '@/components/MyFollow'
+import TagSearch from '@/components/TagSearch'
 import $ from 'jquery'
 Vue.use(Router)
 
@@ -72,6 +73,10 @@ export default new Router({
       path: '/myfollow/',
       name: 'MyFollow',
       component: MyFollow
+    }, {
+      path: '/tagsearch/',
+      name: 'TagSearch',
+      component: TagSearch
     }
   ]
 })
