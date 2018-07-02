@@ -9,7 +9,7 @@
             <li id="search-bar">
                <!-- <i id="search-icon" class="el-icon-search  "></i> -->
                 <input v-model="searchtag" placeholder="发现新的Pick..." ></input>
-                <a @click="TagSearch()">Search</a>
+                <a @click="TagSearch($store.state.id)">Search</a>
             </li>
 
             <li>
@@ -262,8 +262,13 @@ export default {
       this.$store.commit("userLogout");
       this.$router.push({ path: "/" });
     },
-    toMeInfo() {
-      this.$router.push({ path: "/me" });
+    toMeInfo(id) {
+      this.$router.push({ 
+        path: "/me",
+        query: {
+          userId: id
+        }
+      });
     },
     onPick(id) {
       var inpick = -1;
@@ -316,9 +321,18 @@ export default {
         });
       }
     },
-    TagSearch() {
+
+    TagSearch(id) {
       console.log(this.searchtag);
+      this.$router.push({ 
+        path: "/tagsearch" , 
+        query: {
+          userId: id,
+          tagname: this.searchtag
+        }
+      });
     },
+
     isPicked(id) {
       return this.UserInfo.UserPick.indexOf(id) != -1;
     },

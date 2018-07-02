@@ -30,7 +30,7 @@
               <el-card :body-style="{ padding: '0px' }">
                 <img :src="entry.picture" class="image">
                 <div style="padding: 14px;">
-                  <span>{{entry.Username}}</span>
+                  <span>{{entry.user.username}}</span>
                   <div class="bottom clearfix">
                     <time class="time"> </time>
                     <el-button type="text" class="button">详情</el-button>
@@ -52,8 +52,8 @@
         data() {
             return {
 
-                getUserAPI:"http://127.0.0.1:8000/starpick/get_user",
-                getEntrybyHashname:"http://127.0.0.1:8000/starpick/get_entrys_by_hash?hashName='wla'",
+                //getUserAPI:"http://127.0.0.1:8000/starpick/get_user",
+                getEntrybyHashname:"http://127.0.0.1:8000/starpick/get_entrys_by_hash",
                 entryAPI:"http://127.0.0.1:8000/starpick/get_entry",
 
                 entries: [
@@ -69,22 +69,17 @@
         },
         async mounted(){
           const self = this;
+          console.log(this.$route);
 
-          this.$http.get(this.getUserAPI, {
-            params:{
-                id: this.$store.state.id
+          await this.$http.get(this.getEntrybyHashname, { 
+            params: {
+              hashName:  this.$route.query.tagname
             }
           }).then(
             (res) => {
-                if (res.data.success) {
-                    console.log("> ME: ", self.$store.state.id);
-                }
-            }
-          );
-
-          await this.$http.get(this.getEntrybyHashname, { }).then(
-            (res) => {
+              //console.log(self.entries)
               self.entries = res.data.entries;
+              //console.log(self.entries)
 
               for (var i = 0; i < res.data.entries.length; i++) {
                 var e = res.data.entries[i];
@@ -97,8 +92,9 @@
                 ).then(
                   (function(i){
                     return (res) => {
-                      console.log("> RANK: entry = ", res.data.entry);
-                      self.entries[i].description = res.data.entry.description;
+                      console.log("> SEARCH: entry = ", res.data.entry.user.username);
+                      //self.entries[i].username = res.data.entry.user.username;
+                      self.entries[i].picture = res.data.entry.picture;
                     };
                   })(i)
                 );
@@ -112,18 +108,27 @@
         },
         methods: {
             toHome() {
-                this.$router.push({ path: "/home" });
+                this.$router.push({ 
+                  path: "/home",
+                  query: {
+                     userId: this.$store.state.id
+                  } 
+                });
             },
             onUploadClick() {
                 this.$store.state.uploadedImageSrc = null;
-                this.$router.push({ path: "/upload" });
+                this.$router.push({ 
+                  path: "/upload",
+                  query: {
+                     userId: this.$store.state.id
+                  } 
+                });
             },
             onLogOut() {
                 this.$store.commit("userLogout");
                 this.$router.push({ path: "/" });
             },
-            toMeInfo() {
-                
+            toMeInfo() {     
                 this.$router.push({
                     path: "/me/",
                     query: {
@@ -152,8 +157,23 @@
             toSettings() {
                 this.$router.push({ path: "/setting" });
             },
+        },
+
+        async beforeMount() {
+          if (localStorage.username !== undefined) {
+            this.$store.commit("userLogin", {
+              token: localStorage.token,
+              id: localStorage.id,
+              email: localStorage.email,
+              username: localStorage.username
+            });
+          }
         }
+
     }
+
+    
+
 </script>
 
 <style scoped>
