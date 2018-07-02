@@ -15,9 +15,7 @@
                         <i id="upload-button" v-on:click="onUploadClick" class="el-icon-plus icon"></i> 
                     </div>
                 </li>
-                <li>
-                    <div id="username-label">{{$store.state.username }}</div> 
-                </li>
+
                 <li  @click="toMeInfo()" >
                     <img id="me-icon" src="/static/me.png"></img>
                 </li>
@@ -580,7 +578,7 @@ li {
     list-style: none;
 }
 #me-icon {
-    margin-top:5px;
+    margin: 10px;
     width: 30px;
     height: 30px;
 }
