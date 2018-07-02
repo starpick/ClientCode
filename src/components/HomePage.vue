@@ -16,9 +16,9 @@
               <router-link id="ranking-link" to="/pickranking">榜</router-link>
             </li>
             <li><div style="margin:auto;"><i id="upload-button" v-on:click="onUploadClick" class="el-icon-plus icon"></i>  </div> </li>
-            <li>
+            <!-- <li>
               <img id="me-icon" @click="toMeInfo()" src="/static/me.png"></img>
-            </li>
+            </li> -->
             <li>
               <div id="username-label"> 
                 <a 
@@ -31,7 +31,7 @@
         <div class="info-container">
           <div class="avatar-container">
             <div class="avatar">
-              <img class="avatar-img" src="/static/ceo.png"></img>
+              <img class="avatar-img" :src="feed.user.header"></img>
             </div>
           </div>
             <div class="username" @click="onClickUserName( feed.user.id )">  
@@ -928,5 +928,8 @@ li a {
   margin: auto;
   font-size: 20px;
   font-weight: bold;
+}
+header ul li a {
+  margin-top: 10px;
 }
 </style>

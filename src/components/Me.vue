@@ -73,7 +73,7 @@
                     </div>
                 </li>
                 <li>
-                    <div id="my-follow" @click="toMyFollow()">
+                    <div id="my-follow" @click="toMyFollow( $store.state.id )">
                         <!-- <p> {{$store.state.username}} </p> -->
                         <div> {{followLength}} </div>
                         <div>Follow</div>
@@ -93,7 +93,7 @@
         <div class="null-line">
         </div>
 
-        <div id="others">
+        <div id="others" v-if="$store.state.username == user.username">
             <div id="myAlbums" class="someProfile" @click="toAlbums()">
                 <img src="/static/album.png" class="icon"></img>
                 <div>Albums</div>
@@ -194,13 +194,13 @@
                     console.log(self.user)
                 });
             },
-            toPick(){
-                // this.$router.push({
-                //     path: "/mystarpick",
-                //     query: {
-                //         userId: this.$store.state.id
-                //     }
-                // });
+            toPick(id){
+                this.$router.push({
+                    path: "/mystarpick/",
+                    query: {
+                        userId: id
+                    }
+                });
             },
             toHome() {
                 this.$router.push({ path: "/home" });
@@ -216,12 +216,11 @@
                 this.$store.commit("userLogout");
                 this.$router.push({ path: "/" });
             },
-            toMeInfo() {
-                
+            toMeInfo(id) {
                 this.$router.push({
                     path: "/me/",
                     query: {
-                     userId: this.$store.state.id
+                     userId: id
                     }
                 });
             },
@@ -231,9 +230,14 @@
             modifyUserName() {
                 console.log("test modify username!");
             },
-            toMyFollow() {
+            toMyFollow(id) {
                 console.log("test router myfollow!");
-                this.$router.push({ path: "/myfollow" });
+                this.$router.push({
+                    path: "/myfollow/",
+                    query: {
+                        userId: id
+                    }
+                });
             },
             toAlbums() {
                 // this.$router.push({ path: "/albums" });

@@ -2,27 +2,14 @@
     <div id="my-follow-container">
         <header>  
             <ul>
-                <li id="logo-img-container"> 
+                <!-- <li id="logo-img-container"> 
                     <img id="logo-img" src="/static/logo.png" @click="toHome()"></img> 
+                </li> -->
+                <li  @click="toLastPage($store.state.id)">
+                    <img id="return-icon" src="/static/return_2.png"></img>
+                    <div>Me</div>
                 </li>
-                <li id="search-bar">
-                   <!-- <i id="search-icon" class="el-icon-search  "></i> -->
-                    <input placeholder="发现新的Pick..." > </input>
-                </li>
-                <li>
-                    <div style="margin:auto;">
-                        <i id="upload-button" v-on:click="onUploadClick" class="el-icon-plus icon"></i> 
-                    </div>
-                </li>
-                <li>
-                    <div id="username-label">{{$store.state.username}}</div> 
-                </li>
-                <li>
-                    <img id="me-icon" @click="toMeInfo()" src="/static/me.png"></img>
-                </li>
-                <li>
-                    <img id="logout-icon" @click="onLogOut()" src="/static/exit.png"></img>
-                </li>
+                
             </ul>
         </header>
     
@@ -41,11 +28,11 @@
                     <div class="follow-avatar">
                         <img class="avatar-img" :src="follow.header">
                     </div>
-                    <div class="follow-username" @click="toFollowUser()">
+                    <div class="follow-username" @click="toFollowUser( follow.id )">
                         {{follow.username}}
                     </div>
                     <div class="follow-state">
-                        <input type="button" value="Followed" class="followed-button" @click="changeFollowState()"></input>
+                        <input type="button" value="Followed" class="followed-button" @click="changeFollowState( follow.id )"></input>
                         <!-- <button>Followed</button> -->
                     </div>
                    
@@ -99,6 +86,14 @@
             toHome() {
                 this.$router.push({ path: "/home" });
             },
+            toLastPage(id) {
+                this.$router.push({
+                    path: "/me/",
+                    query: {
+                      userId: id
+                    }
+                });
+            },
             onUploadClick() {
                 this.$store.state.uploadedImageSrc = null;
                 this.$router.push({ path: "/upload" });
@@ -110,11 +105,27 @@
             toMeInfo() {
                 this.$router.push({ path: "/me" });
             },
-            toFollowUser() {
+            toFollowUser(id) {
                 console.log("test router to my follow user info page!");
+                this.$router.push({
+                    path: "/me/",
+                    query: {
+                      userId: id
+                    }
+                });
             },
-            changeFollowState() {
+            changeFollowState(id) {
                 console.log("test changeFollowState!");
+                // this.followThisUser = false;
+
+                // this.follows.splice(this.follows.indexOf(id), 1);
+
+                // this.$http.get(this.unfollowAPI, {
+                //     params:{
+                //         token: this.$store.state.token,
+                //         followerId: this.user.id
+                //     }
+                // });
             }
 
         }
@@ -164,7 +175,11 @@
         width: 100%;
     }
     header li div {
-        margin: auto;
+        /*text-align: left;*/
+        position: relative;
+        left: -3px;
+        top: 10px;
+        margin: 0;
     }
     #logo-img {
         flex: 1;
@@ -172,6 +187,12 @@
         width: 100%;
         max-width: 80%;
         border-radius: 100px;
+    }
+    #return-icon {
+        width: 30px;
+        height: 30px;
+        position: relative;
+        top: 5px;
     }
     #search-bar {
         flex: 2;
