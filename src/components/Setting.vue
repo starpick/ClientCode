@@ -2,7 +2,7 @@
   <div id="Setting-container">
     <header>
       <div id='return'>
-        <router-link to="/me"><img src="/static/return.png"></img></router-link>
+        <img src="/static/return.png" @click="returnme($store.state.id)"></img>
       </div>
       <div id='settings'>Settings</div>
     </header>
@@ -31,20 +31,7 @@ export default {
   name: "HomePage",
   data() {
     return {
-      getEntryAPI: "http://127.0.0.1:8000/starpick/get_entry",
-      getTagsAPI: "http://127.0.0.1:8000/starpick/get_tags",
-      getPickAPI: "http://127.0.0.1:8000/starpick/get_pick",
-      getCommentsAPI: "http://127.0.0.1:8000/starpick/comment/getComments",
-      getLikesAPI: "http://127.0.0.1:8000/starpick/get_likes",
-      addLikeAPI: "http://127.0.0.1:8000/starpick/like",
-      addUnlikeAPI: "http://127.0.0.1:8000/starpick/unlike",
-      addCommentAPI: "http://127.0.0.1:8000/starpick/comment/makecomment",
-      queryPickAPI:"http://127.0.0.1:8000/starpick/query_like",
-      config: {
-        headers: {
-          "Content-Type": "multipart/form-data" //之前说的以表单传数据的格式来传递fromdata
-        }
-      },
+      
     }
   },
   methods: {
@@ -52,6 +39,16 @@ export default {
       this.$store.commit("userLogout");
       this.$router.push({ path: "/" });
     },
+
+    returnme(id) {
+      this.$router.push({ 
+        path: "/me" ,
+        query: {
+            userId: id
+        }
+      });
+    },
+
   },
 };
 </script>

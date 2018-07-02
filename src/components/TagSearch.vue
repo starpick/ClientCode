@@ -6,8 +6,8 @@
                     <img id="logo-img" src="/static/logo.png" @click="toHome()"></img> 
                 </li>
                 <li id="search-bar">
-                   <!-- <i id="search-icon" class="el-icon-search  "></i> -->
-                    <input placeholder="发现新的Pick..." > </input>
+                    <input v-model="searchtag" placeholder="发现新的Pick..." ></input>
+                    <img src='/static/search.png' @click="TagSearch($store.state.id)"></img>
                 </li>
                 <li>
                     <div style="margin:auto;">
@@ -33,7 +33,7 @@
                   <span>{{entry.user.username}}</span>
                   <div class="bottom clearfix">
                     <time class="time"> </time>
-                    <el-button type="text" class="button">详情</el-button>
+                    <el-button @click="Detail(entry.entryId)"type="text" class="button">详情</el-button>
                   </div>
                 </div>
               </el-card>
@@ -55,9 +55,11 @@
                 //getUserAPI:"http://127.0.0.1:8000/starpick/get_user",
                 getEntrybyHashname:"http://127.0.0.1:8000/starpick/get_entrys_by_hash",
                 entryAPI:"http://127.0.0.1:8000/starpick/get_entry",
-
+                getPick:"27.0.0.1:8000/starpick/get_pick",
                 entries: [
-                ]
+                ],
+
+                searchtag: '',
             }
         }, 
         
@@ -69,7 +71,6 @@
         },
         async mounted(){
           const self = this;
-          console.log(this.$route);
 
           await this.$http.get(this.getEntrybyHashname, { 
             params: {
@@ -79,7 +80,7 @@
             (res) => {
               //console.log(self.entries)
               self.entries = res.data.entries;
-              //console.log(self.entries)
+              console.log(self.entries)
 
               for (var i = 0; i < res.data.entries.length; i++) {
                 var e = res.data.entries[i];
@@ -92,7 +93,7 @@
                 ).then(
                   (function(i){
                     return (res) => {
-                      console.log("> SEARCH: entry = ", res.data.entry.user.username);
+                      //console.log("> SEARCH: entry = ", res.data.entry);
                       //self.entries[i].username = res.data.entry.user.username;
                       self.entries[i].picture = res.data.entry.picture;
                     };
@@ -112,6 +113,15 @@
                   path: "/home",
                   query: {
                      userId: this.$store.state.id
+                  } 
+                });
+            },
+            Detail() {
+              //console.log(pickentry);
+              this.$router.push({ 
+                  path: "/pickentry/",
+                  query: {
+                     PickEntryID: 22
                   } 
                 });
             },
@@ -136,26 +146,15 @@
                     }
                 });
             },
-            modifyAvatar() {
-                console.log("test modify avatar!");
-            },
-            modifyUserName() {
-                console.log("test modify username!");
-            },
-            toMyFollow() {
-                console.log("test router myfollow!");
-                this.$router.push({ path: "/myfollow" });
-            },
-            toAlbums() {
-                // this.$router.push({ path: "/albums" });
-                console.log("test router to albums!");
-            },
-            toFavorites() {
-                // this.$router.push({ path: "/favorites" });
-                console.log("test router to favorites!");
-            },
-            toSettings() {
-                this.$router.push({ path: "/setting" });
+            TagSearch(id) {
+              console.log(this.searchtag);
+              this.$router.push({ 
+                path: "/tagsearch" , 
+                query: {
+                  userId: id,
+                  tagname: this.searchtag
+                }
+              });
             },
         },
 
@@ -244,8 +243,7 @@ header li div {
 }
 
 #search-bar input {
-    margin: 10px;
-    
+    margin-left: 10px;
     width: auto;
     /*border-radius: 5px;*/
     /*box-shadow: none;*/

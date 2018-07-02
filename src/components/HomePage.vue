@@ -9,7 +9,7 @@
             <li id="search-bar">
                <!-- <i id="search-icon" class="el-icon-search  "></i> -->
                 <input v-model="searchtag" placeholder="发现新的Pick..." ></input>
-                <a @click="TagSearch($store.state.id)">Search</a>
+                <img src='/static/search.png' @click="TagSearch($store.state.id)"></img>
             </li>
 
             <li>
