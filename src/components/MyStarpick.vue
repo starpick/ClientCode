@@ -117,6 +117,7 @@
                 getCommentsAPI: "http://127.0.0.1:8000/starpick/comment/getComments",
                 queryPickAPI: "http://127.0.0.1:8000/starpick/query_like",
                 queryDissAPI: "http://127.0.0.1:8000/starpick/query_diss",
+                getUserAPI:"http://127.0.0.1:8000/starpick/get_user",
 
                 starpickList: [],
                 comments: [],
@@ -136,7 +137,8 @@
                     isBookmark: false,
                     SelfComments: [],
                     hashTags: []
-                }
+                },
+                user: {}
             };
         },
         // mounted(){
@@ -144,16 +146,29 @@
             
         // },
         methods: {
+            // async requestForUserInfo(id){
+            //     console.log(">user ID=",id)
+            //     const self = this;
+            //     await this.$http.get(this.getUserAPI, {
+            //         params: {
+            //             userId: id
+            //         }
+            //     }).then(res => {
+            //         // console.log("> userFollower: res.data", res.data);
+            //         self.user = res.data;
+            //     });
+            // },
             toHome() {
                 this.$router.push({ path: "/home" });
             },
             toLastPage(id) {
-                this.$router.push({
-                    path: "/me/",
-                    query: {
-                      userId: id
-                    }
-                });
+                // this.$router.push({
+                //     path: "/me/",
+                //     query: {
+                //       userId: id
+                //     }
+                // });
+                this.$router.back(-1);
             },
             onClickUserName(id) {
                 this.$router.push({
@@ -271,19 +286,31 @@
             }
         },
         async mounted() {
-            console.log(this.$store.state);
-            // console.log(this.$store.state.email);
+            var id = this.$route.query.userId;
+            console.log(">user ID=",id)
             const self = this;
+            await this.$http.get(this.getUserAPI, {
+                params: {
+                    userId: id
+                }
+            }).then(res => {
+                console.log("> userFollower: res.data", res.data);
+                self.user = res.data;
+            });
+            console.log("this user", this.user);
+            
             var entriesId = [];
+            console.log(this.user.email);
 
             this.$http
                 .get(this.getUserFeedAPI, {
                     params: {
-                        email: this.$store.state.email
+                        email: this.user.email
                     }
+
                 })
                 .then(results => {
-                    // console.log(results.data.entry.length);
+                    console.log("user feed",results.data);
                     var entry_len = results.data.entry.length;
                     var entries = [];
                     

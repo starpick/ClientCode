@@ -30,7 +30,8 @@
                     </div>
                     <div class="follow-state">
                         <input type="button" value="Followed" class="followed-button" @click="changeFollowState( follow.id )"></input>
-                        <!-- <button>Followed</button> -->
+                        <!-- <el-button type="primary" v-if="follow.follow_state" @click="onFollow(follower.id)">UnFollow</el-button>
+                         <el-button type="danger" v-if="!follow.follow_state" @click="onUnFollow(follower.id)">Follow</el-button> -->
                     </div>
                    
                 </div>
@@ -108,12 +109,13 @@
                 this.$router.push({ path: "/home" });
             },
             toLastPage(id) {
-                this.$router.push({
-                    path: "/me/",
-                    query: {
-                      userId: id
-                    }
-                });
+                // this.$router.push({
+                //     path: "/me/",
+                //     query: {
+                //       userId: id
+                //     }
+                // });
+                this.$router.back(-1);
             },
             onUploadClick() {
                 this.$store.state.uploadedImageSrc = null;

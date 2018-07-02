@@ -226,6 +226,7 @@
                 this.$router.push({ path: "/home" });
             },
             toLastPage() {
+                // this.$router.push({ path: "/home" });
                 this.$router.back(-1);
             },
             onUploadClick() {
