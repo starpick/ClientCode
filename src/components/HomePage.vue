@@ -36,7 +36,7 @@
           </div>
             <div class="username" @click="onClickUserName( feed.user.id )">  
               {{feed.user.username}}</div>
-            <div  > debug: {{feed.UploadEntryID}}</div>
+            <!-- <div  > debug: {{feed.UploadEntryID}}</div> -->
           </div>
           <div class="img-container">
             <!-- tag here -->
@@ -454,7 +454,7 @@ export default {
             var pickPromises = [];
             var dissPromises = [];
             var cmtsPromises = [];
-
+              entries = entries.reverse();
               for (var i = 0; i < entries.length; i++) {
                   // check pick
                   pickPromises.push(this.$http
