@@ -238,6 +238,8 @@ export default {
   },
   methods: {
     searchTag(tag){
+          console.log("> HomePage: ", tag);
+
       this.$router.push({
         path: "/tagsearch",
         query: {
@@ -336,7 +338,7 @@ export default {
         path: "/tagsearch" , 
         query: {
           userId: id,
-          tagname: this.searchtag
+          tag: this.searchtag
         }
       });
     },

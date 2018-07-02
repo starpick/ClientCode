@@ -73,6 +73,7 @@
             }
         },
         mounted(){
+          console.log("> tagsearch: ", this.$route.query.tag);
           this.updatePage(this.$route.query.tag);
           
         },
