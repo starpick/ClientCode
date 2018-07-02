@@ -26,7 +26,7 @@
             </ul>
         </header>
         <div id="body-contrainer">
-          <el-row v-for="(entry, index) in entries">
+          <el-row v-for="(entry, index) in entries" :key="entry.id">
               <el-card :body-style="{ padding: '0px' }">
                 <img :src="entry.picture" class="image">
                 <div style="padding: 14px;">

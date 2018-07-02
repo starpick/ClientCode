@@ -8,7 +8,8 @@
             </li>
             <li id="search-bar">
                <!-- <i id="search-icon" class="el-icon-search  "></i> -->
-                <input placeholder="发现新的Pick..." > </input>
+                <input v-model="searchtag" placeholder="发现新的Pick..." ></input>
+                <a @click="TagSearch()">Search</a>
             </li>
 
             <li>
@@ -123,6 +124,7 @@ export default {
           "Content-Type": "multipart/form-data" //之前说的以表单传数据的格式来传递fromdata
         }
       },
+      searchtag: '',
       comments: [],
       feeds: [],
       fakeFeed: [
@@ -313,6 +315,9 @@ export default {
           }
         });
       }
+    },
+    TagSearch() {
+      console.log(this.searchtag);
     },
     isPicked(id) {
       return this.UserInfo.UserPick.indexOf(id) != -1;
