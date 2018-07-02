@@ -13,6 +13,7 @@ import Setting from '@/components/Setting'
 import Me from '@/components/Me'
 import MyFollow from '@/components/MyFollow'
 import TagSearch from '@/components/TagSearch'
+import MyStarpick from '@/components/MyStarpick'
 import $ from 'jquery'
 Vue.use(Router)
 
@@ -77,6 +78,10 @@ export default new Router({
       path: '/tagsearch/',
       name: 'TagSearch',
       component: TagSearch
+    }, {
+      path: '/mystarpick',
+      name: 'MyStarpick',
+      component: MyStarpick
     }
   ]
 })
