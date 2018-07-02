@@ -43,7 +43,7 @@
                 <li>
                     <!-- <div class="username"> Light </div> -->
                     <div class="username" @click="modifyUserName()">   {{user.username}} </div>
-                    <div class="email" >   {{user.email}} </div>
+                    <div class="email" > {{user.email}} </div>
                 </li>
                 <li>
                     <!-- <div id="userIntro"> {{$store.state.intro}} </div> -->
@@ -274,6 +274,17 @@
                 });
             }
 
+        },
+        async beforeMount() {
+            if (localStorage.username !== undefined) {
+                this.$store.commit("userLogin", {
+                token: localStorage.token,
+                id: localStorage.id,
+                email: localStorage.email,
+                username: localStorage.username
+                });
+            // this.$router.push({ path: "/home" });
+            }
         }
     }
 </script>
