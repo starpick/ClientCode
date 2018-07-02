@@ -7,7 +7,8 @@
                 </li>
                 <li id="search-bar">
                     <input v-model="searchtag" placeholder="发现新的Pick..." ></input>
-                    <img src='/static/search.png' @click="TagSearch($store.state.id)"></img>
+                    <img src='/static/search.png' @click="TagSearch($store.state.id)"  :value="searchtag"></img>
+ 
                 </li>
                 <li>
                     <div style="margin:auto;">
@@ -30,10 +31,13 @@
               <el-card :body-style="{ padding: '0px' }">
                 <img :src="entry.picture" class="image">
                 <div style="padding: 14px;">
-                  <div id = 'search_tag_user' @click="onClickUserName(entry.user.id)">{{entry.user.username}}</div>
+                  <span style="font-weight: bold;" @click="onClickUserName( entry.user.id )">
+                      {{entry.user.username}}
+                 </span>
+                  <span>{{entry.description}}</span>
+                  <span v-for="tag in entry.hashTags" class="tag-span" @click="searchTag(tag)">#{{tag}}</span>
                   <div class="bottom clearfix">
-                    <time class="time"> </time>
-                    <el-button @click="Detail(entry.entryId)"type="text" class="button">详情</el-button>
+                    <time class="time"> </time> 
                   </div>
                 </div>
               </el-card>
@@ -51,15 +55,14 @@
         name: "TagSearch",
         data() {
             return {
-
+                searchtag: "",
                 //getUserAPI:"http://127.0.0.1:8000/starpick/get_user",
                 getEntrybyHashname:"http://127.0.0.1:8000/starpick/get_entrys_by_hash",
                 entryAPI:"http://127.0.0.1:8000/starpick/get_entry",
                 getPick:"27.0.0.1:8000/starpick/get_pick",
                 entries: [
-                ],
+                ]
 
-                searchtag: '',
             }
         }, 
         
@@ -69,45 +72,71 @@
             // 对路由变化作出响应...
             }
         },
-        async mounted(){
-          const self = this;
-
-          await this.$http.get(this.getEntrybyHashname, { 
-            params: {
-              hashName:  this.$route.query.tagname
-            }
-          }).then(
-            (res) => {
-              //console.log(self.entries)
-              self.entries = res.data.entries;
-              console.log(self.entries)
-
-              for (var i = 0; i < res.data.entries.length; i++) {
-                var e = res.data.entries[i];
-                this.$http.get(
-                  this.entryAPI, {
-                    params: {
-                      entryId: e.entryId
-                    }
-                  }
-                ).then(
-                  (function(i){
-                    return (res) => {
-                      //console.log("> SEARCH: entry = ", res.data.entry);
-                      //self.entries[i].username = res.data.entry.user.username;
-                      self.entries[i].picture = res.data.entry.picture;
-                    };
-                  })(i)
-                );
-              }
-            }
-          );
-            
+        mounted(){
+          this.updatePage(this.$route.query.tag);
+          
         },
         computed:{
             
         },
         methods: {
+            async updatePage(tag){
+                this.searchtag = this.$route.query.tag;
+                const self = this;
+                    //   console.log(this.$route);
+
+                await this.$http.get(this.getEntrybyHashname, { 
+                    params: {
+                    hashName:  tag
+                    }
+                }).then(
+                    (res) => {
+                    //console.log(self.entries)
+                    self.entries = res.data.entries;
+                    //console.log(self.entries)
+
+                    for (var i = 0; i < res.data.entries.length; i++) {
+                        var e = res.data.entries[i];
+                        this.$http.get(
+                        this.entryAPI, {
+                            params: {
+                            entryId: e.entryId
+                            }
+                        }
+                        ).then(
+                        (function(i){
+                            return (res) => {
+                            console.log("> SEARCH: entry = ", res.data.entry);
+                            //self.entries[i].username = res.data.entry.user.username;
+                            self.entries[i].picture = res.data.entry.picture;
+                            };
+                        })(i)
+                        );
+                    }
+                    }
+                );
+            },
+            onClickUserName(id) {
+                this.$router.push({
+                    path: "/me/",
+                    query: {
+                        userId: id
+                    }
+                });
+            },
+            searchTag(tag){
+                this.updatePage(tag);
+
+            },
+            onClickTag(pickentry) {
+                // console.log(pickentry);
+                this.$router.push({
+                    path: "/pickentry/",
+                    query: {
+                    PickEntryID: pickentry.pickId
+                    }
+                });
+            },
             toHome() {
                 this.$router.push({ 
                   path: "/home",
@@ -312,4 +341,9 @@ li {
     left: 5%;
 }
 
+.tag-span {
+  margin-left: 3px;
+  font-style: italic;
+  font-weight: bold;
+}
 </style>

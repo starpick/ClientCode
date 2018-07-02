@@ -62,7 +62,7 @@
           <div class="social-container">
             <div class="description-container">
               <span class="description-user">{{feed.Username}}</span>{{feed.Description}}
-              <span v-for="tag in feed.hashTags" class="tag-span"><a>#{{tag}}</a></span>
+              <span v-for="tag in feed.hashTags" class="tag-span" @click="searchTag(tag)" ><a>#{{tag}}</a></span>
             </div>
             <div class="social-counter">
               <div>
@@ -237,6 +237,14 @@ export default {
     };
   },
   methods: {
+    searchTag(tag){
+      this.$router.push({
+        path: "/tagsearch",
+        query: {
+          tag: tag
+        }
+      })
+    },
     onClickUserName(id) {
       this.$router.push({
         path: "/me/",
@@ -403,6 +411,7 @@ export default {
       .then(res => {
         // better：并行 promise
         var prms = [];
+        res.data.follows.push(self.$store.state);
         for (var i = 0; i < res.data.follows.length; i++) {
           followusers.push(res.data.follows[i].email);
           prms.push(
@@ -475,6 +484,7 @@ export default {
                         entryId: entries[i]
                       }
                     })); 
+
                     // .then(res => {
                     //   if (res.data.success) {
                     //     if (res.data.diss == true) {
