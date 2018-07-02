@@ -14,6 +14,7 @@ import Me from '@/components/Me'
 import MyFollow from '@/components/MyFollow'
 import TagSearch from '@/components/TagSearch'
 import MyStarpick from '@/components/MyStarpick'
+import MyFollower from '@/components/MyFollower'
 import $ from 'jquery'
 Vue.use(Router)
 
@@ -71,7 +72,7 @@ export default new Router({
       name: 'Me',
       component: Me
     }, {
-      path: '/myfollow/',
+      path: '/follow/',
       name: 'MyFollow',
       component: MyFollow
     }, {
@@ -79,9 +80,13 @@ export default new Router({
       name: 'TagSearch',
       component: TagSearch
     }, {
-      path: '/mystarpick',
+      path: '/starpick',
       name: 'MyStarpick',
       component: MyStarpick
+    }, {
+      path: '/follower',
+      name: 'MyFollower',
+      component: MyFollower
     }
   ]
 })
