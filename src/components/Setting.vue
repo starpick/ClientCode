@@ -2,7 +2,7 @@
   <div id="Setting-container">
     <header>
       <div id='return'>
-        <img src="/static/return.png" @click="returnme($store.state.id)"></img>
+        <img src="/static/return_2.png" @click="returnme($store.state.id)" style="width: 30px;"></img>
       </div>
       <div id='settings'>Settings</div>
     </header>
@@ -41,12 +41,7 @@ export default {
     },
 
     returnme(id) {
-      this.$router.push({ 
-        path: "/me" ,
-        query: {
-            userId: id
-        }
-      });
+      this.$router.back(-1);
     },
 
   },
