@@ -139,9 +139,6 @@
             toHome() {
                 this.$router.push({ 
                   path: "/home",
-                  query: {
-                     userId: this.$store.state.id
-                  } 
                 });
             },
             Detail() {
