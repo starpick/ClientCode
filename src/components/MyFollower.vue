@@ -29,11 +29,10 @@
                         {{follower.username}}
                     </div>
                     <div class="follow-state" v-if="follower.id != $store.state.id">
-                        <!-- <span>{{follow_state}}</span> -->
-                        <!-- <el-button type="danger" v-if="follow_state[index]" @click="onUnFollow(follower.id,index)">UnFollow</el-button>
-                        <el-button type="primary" v-if="!follow_state[index]" @click="onFollow(follower.id,index)">Follow</el-button> -->
-                        <el-button type="primary" v-if="!debug" @click="onFollow(follower.id,index)">Follow</el-button>
-                        <el-button type="danger" v-if="debug" @click="onUnFollow(follower.id,index)">UnFollow</el-button>
+                        <el-button type="danger" v-if="follow_state[index]" @click="onUnFollow(follower.id,index)">UnFollow</el-button>
+                        <el-button type="primary" v-if="!follow_state[index]" @click="onFollow(follower.id,index)">Follow</el-button>
+                        <!-- <el-button type="primary" v-if="!debug" @click="onFollow(follower.id,index)">Follow</el-button>
+                        <el-button type="danger" v-if="debug" @click="onUnFollow(follower.id,index)">UnFollow</el-button> -->
                     </div>
                    
                 </div>
@@ -203,15 +202,17 @@
                     }
                 );
                 this.follows.push(id);
-                this.follow_state[i] = true;
-                this.debug = true;
+                var tmp = this.follow_state;
+                tmp[i] = true;
+                this.follow_state = tmp;
+                this.$forceUpdate();
                 // console.log(this.follow_state);
-                console.log(this.isFollowed(id,i));
             },
             onUnFollow(id,i) {
                 // this.followThisUser = false;
-                this.follow_state[i] = false;
-                this.debug = false;
+                var tmp = this.follow_state;
+                tmp[i] = false;
+                this.follow_state = tmp;
                 this.follows.splice(this.follows.indexOf(id), 1);
 
                 this.$http.get(this.unfollowAPI, {
@@ -220,34 +221,10 @@
                         followerId: id
                     }
                 });
+                this.$forceUpdate();
                 // console.log(this.follow_state);
 
-            },
-            isFollowed(id, index) {
-                var result = false;
-                this.$http.get(this.getfollowings, {
-                    params:{
-                        id: this.$store.state.id
-                    }
-                }).then(res => {
-                    res.data.follows.forEach(follow => {
-                        
-                        if (follow.id == id) {
-                            result =  true;
-                        }
-                        console.log(follow.id, id, index, result);
-                    });
-                });
-                console.log(result);
-                return result;
-                // var debug = false;
-                // for (var j = 0; j < this.follows.length; j++) {
-                //     if (id == this.follows[j].id) {
-                //         debug =  true;
-                //     }
-                // }
-                // return debug;
-              }
+            }
         },
 
         async beforeMount() {
@@ -399,8 +376,8 @@
         top: 15px;
     }
     .follow-state {
-        position: relative;
-        left: 200px;
+        position: absolute;
+        left: 270px;
         top: 10px;
     }
     .followed-button {

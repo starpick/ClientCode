@@ -28,10 +28,10 @@
                     <div class="follow-username" @click="toFollowUser( follow.id )">
                         {{follow.username}}
                     </div>
-                    <div class="follow-state">
-                        <input type="button" value="Followed" class="followed-button" @click="changeFollowState( follow.id )"></input>
-                        <!-- <el-button type="primary" v-if="follow.follow_state" @click="onFollow(follower.id)">UnFollow</el-button>
-                         <el-button type="danger" v-if="!follow.follow_state" @click="onUnFollow(follower.id)">Follow</el-button> -->
+                    <div class="follow-state" v-if="follow.id != $store.state.id">
+                        <!-- <input type="button" value="Followed" class="followed-button" @click="changeFollowState( follow.id )"></input> -->
+                        <el-button type="danger" v-if="follow_state[index]" @click="onUnFollow(follow.id,index)">UnFollow</el-button>
+                        <el-button type="primary" v-if="!follow_state[index]" @click="onFollow(follow.id,index)">Follow</el-button>
                     </div>
                    
                 </div>
@@ -50,8 +50,11 @@
         name: "MyFollow",
         data() {
             return {
-                getfollowings:"http://127.0.0.1:8000/starpick/follow/getfollowings",
+                getFollowersAPI: "http://127.0.0.1:8000/starpick/follow/getfollowers",
                 getUserAPI:"http://127.0.0.1:8000/starpick/get_user",
+                getfollowings:"http://127.0.0.1:8000/starpick/follow/getfollowings",
+                followAPI:"http://127.0.0.1:8000/starpick/follow/follow",
+                unfollowAPI:"http://127.0.0.1:8000/starpick/follow/unfollow",
 
                 user: {},
                 // follows: []
@@ -69,7 +72,10 @@
                         email: "shinne@shinne.com"
                     }
 
-                ]
+                ],
+                follow_state: [],
+                followLength: 0,
+                myfollows: []
             }
         },
         mounted(){
@@ -83,6 +89,7 @@
             // }).then(res=>{
             //     self.follows = res.data.follows;
             // });
+            
         },
         methods: {
             async requestForUserInfo(id){
@@ -103,7 +110,24 @@
                     });
                 }).then(results => {
                     self.follows = results.data.follows;
+                    self.followLength = self.follows.length;
                 });
+                await this.$http.get(this.getfollowings, {
+                    params: {
+                        id: this.$store.state.id
+                    }
+                }).then(res => {
+                    self.myfollows = res.data.follows;
+                    for (var i = 0; i < self.followLength; i++) {
+                        var flag = false;
+                        for (var j = 0; j < self.myfollows.length; j++) {
+                            if (self.follows[i].id == self.myfollows[j].id) {
+                                flag = true;
+                            }
+                        }
+                        this.follow_state.push(flag);
+                    }
+                })
             },
             toHome() {
                 this.$router.push({ path: "/home" });
@@ -137,18 +161,41 @@
                     }
                 });
             },
-            changeFollowState(id) {
-                console.log("test changeFollowState!");
+            onFollow(id,i){
+                
+                this.$http.get(this.followAPI, {
+                    params:{
+                        token:this.$store.state.token,
+                        followerId: id
+                    }
+                }).then(
+                    res=>{
+                        console.log("> Myfollower: res.data = ", res.data);
+                    }
+                );
+                // this.follows.push(id);
+                var tmp = this.follow_state;
+                tmp[i] = true;
+                this.follow_state = tmp;
+                this.$forceUpdate();
+                // console.log(this.follow_state);
+            },
+            onUnFollow(id,i) {
                 // this.followThisUser = false;
-
+                var tmp = this.follow_state;
+                tmp[i] = false;
+                this.follow_state = tmp;
                 // this.follows.splice(this.follows.indexOf(id), 1);
 
-                // this.$http.get(this.unfollowAPI, {
-                //     params:{
-                //         token: this.$store.state.token,
-                //         followerId: this.user.id
-                //     }
-                // });
+                this.$http.get(this.unfollowAPI, {
+                    params:{
+                        token: this.$store.state.token,
+                        followerId: id
+                    }
+                });
+                this.$forceUpdate();
+                // console.log(this.follow_state);
+
             }
 
         },
@@ -297,6 +344,12 @@
         overflow: hidden;
         border-radius: 150px;
     }
+    .follow-list {
+        position: relative;
+    }
+    .follow-info {
+        position: relative;
+    }
     .follow-username {
         text-align: left;
         position: relative;
@@ -304,23 +357,10 @@
         top: 15px;
     }
     .follow-state {
-        /*border: 1px;*/
-    }
-    .followed-button {
-        border: none;
         position: absolute;
-        right: 10px;
-        margin-top: 20px;
-        background-color: darkturquoise;
-        color: white;
-        border-radius: 30px;
+        left: 270px;
+        top: 10px;
     }
-/*    .followed-button:hover {
-        background-color: #5EC8CB;
-    }
-*/    .followed-button:active {
-        background-color: #B3D5DB;
-        color: #6E7286;
-    }
+    
 
 </style>
