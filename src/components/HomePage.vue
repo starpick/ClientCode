@@ -233,7 +233,8 @@ export default {
         isBookmark: false,
         SelfComments: [],
         hashTags: []
-      }
+      },
+      current_entry_num: 0
     };
   },
   methods: {
@@ -282,11 +283,18 @@ export default {
     },
     onPick(id) {
       var inpick = -1;
+      // console.log(this.UserInfo.UserPick.length);
+
       if (this.UserInfo.UserPick.length > 0) {
-        inpick = this.UserInfo.UserPick.indexOf(id);
+        // console.log(this.UserInfo.UserPick.indexOf(id));
+        var index = this.UserInfo.UserPick.indexOf(id);
+        // console.log("index", index);
+        inpick = index;
+        // console.log("inpick", inpick);
       }
 
       if (inpick == -1) {
+        // console.log("inpick:", inpick);
         this.$http.get(this.addLikeAPI, {
           params: {
             token: this.$store.state.token,
@@ -302,8 +310,11 @@ export default {
           }
         });
         console.log("> HOME_PAGE: ", this.UserInfo.UserPick);
-        this.UserInfo.UserPick[inpick] = -1;
+        this.UserInfo.UserPick.splice(inpick, 1);
+        console.log("> HOME_PAGE: ", this.UserInfo.UserPick);
+
       }
+      
     },
     onDiss(id) {
       var inpick = -1;
@@ -344,10 +355,12 @@ export default {
     },
 
     isPicked(id) {
-      return this.UserInfo.UserPick.indexOf(id) != -1;
+        // console.log("userpick", this.UserInfo.UserPick.indexOf(id));
+        return this.UserInfo.UserPick.indexOf(id) != -1;
     },
     isDissed(id) {
-      return this.UserInfo.UserDiss.indexOf(id) != -1;
+        // console.log("userdiss", this.UserInfo.UserDiss.indexOf(id));
+        return this.UserInfo.UserDiss.indexOf(id) != -1;
     },
     addComment(pickentryid, i) {
       var dt = new Date();
@@ -439,6 +452,7 @@ export default {
               console.log(res.data);
               res.data.entry.forEach(e => {
                 var entryId = e.entryId;
+                self.current_entry_num = self.current_entry_num + 1;
                 entries.push(entryId);
                 var feedEntry = JSON.parse(JSON.stringify(self.emptyFeed));
                 feedEntry.Description = e.description;
@@ -448,6 +462,17 @@ export default {
                 feedEntry.hashTags = e.hashTags;
                 feedEntry.user = e.user;
                 feedEntry.PickEntries = e.tags;
+                
+                // console.log(e.entryId, self.current_entryId);
+                self.$http.get(self.getCommentsAPI, {
+                  params: {
+                    entryId: e.entryId
+                  }
+                }).then(cmt => {
+                  // console.log(self.feeds[self.current_entry_num-1], self.current_entry_num);
+                  feedEntry.Comments = cmt.data.comments; 
+                });
+                
                 self.feeds.push(feedEntry);
               });
             });
@@ -473,11 +498,12 @@ export default {
                     //   }
                     // });
 
-                cmtsPromises.push(self.$http.get(self.getCommentsAPI, {
-                  params: {
-                    entryId: entries[i]
-                  }
-                })); 
+                // cmtsPromises.push(self.$http.get(self.getCommentsAPI, {
+                //   params: {
+                //     entryId: entries[i]
+                //   }
+                // }));
+                 
 
                   dissPromises.push(this.$http
                     .get(this.queryDissAPI, {
@@ -498,13 +524,13 @@ export default {
                 }
 
 
-                Promise.all(cmtsPromises).then(results=>{
-                  results.forEach((res, i) => {
-                    if (res.data.success) {
-                      self.feeds[i].Comments = res.data.comments;
-                    }
-                  });
-                });
+                // Promise.all(cmtsPromises).then(results=>{
+                //   results.forEach((res, i) => {
+                //     if (res.data.success) {
+                //       self.feeds[i].Comments = res.data.comments;
+                //     }
+                //   });
+                // });
 
                 Promise.all(pickPromises).then(results=>{
                   results.forEach((res, i) => {

@@ -43,10 +43,10 @@
                 <div class="icon-container">
                     <ul>
                         <li class="left-li  " @click="onPick(starpick.UploadEntryID)"> 
-                            <span  :class="{judge:true,pick:true, ispick:isPicked(starpick.UploadEntryID)}"><span style="visibility: hidden;">_</span></span><span>{{starpick.Pick}}</span>
+                            <span  :class="{judge:true,pick:true, ispick:isPicked(starpick.UploadEntryID), nopick:!isPicked(starpick.UploadEntryID)}"><span style="visibility: hidden;">_</span></span><span>{{starpick.Pick}}</span>
                           </li>
                         <li class="left-li  " @click="onDiss(starpick.UploadEntryID)">  
-                            <span   :class="{judge:true,diss:true, isdiss:isDissed(starpick.UploadEntryID)}"></span>
+                            <span   :class="{judge:true,diss:true, isdiss:isDissed(starpick.UploadEntryID), nodiss:!isDissed(starpick.UploadEntryID)}"></span>
                             <span style="visibility: hidden;">_</span>
                             <span>{{starpick.Comments.length}}</span>
                         </li> 
@@ -209,7 +209,7 @@
                             }
                         });
                         console.log("> MyStarpick: ", this.UserInfo.UserPick);
-                        this.UserInfo.UserPick[inpick] = -1;
+                        this.UserInfo.UserPick.splice(inpick, 1);
                     }
             },
             onDiss(id) {
@@ -328,21 +328,31 @@
                         feedEntry.hashTags = e.hashTags;
                         feedEntry.user = e.user;
                         feedEntry.PickEntries = e.tags;
+
+                        self.$http.get(self.getCommentsAPI, {
+                            params: {
+                                entryId: e.entryId
+                            }
+                        }).then(cmt => {
+                            // console.log(self.feeds[self.current_entry_num-1], self.current_entry_num);
+                            feedEntry.Comments = cmt.data.comments; 
+                        });
+
                         self.starpickList.push(feedEntry);
                     });
                 })
                 .then(res => {
-                    var cmtsPromises = [];
+                    // var cmtsPromises = [];
                     var pickPromises = [];
                     var dissPromises = [];
 
                     for (var i = 0; i < entriesId.length; i++) {
 
-                        cmtsPromises.push(this.$http.get(this.getCommentsAPI, {
-                            params: {
-                                entryId: entriesId[i]
-                            }
-                        }));
+                        // cmtsPromises.push(this.$http.get(this.getCommentsAPI, {
+                        //     params: {
+                        //         entryId: entriesId[i]
+                        //     }
+                        // }));
 
                         pickPromises.push(this.$http.get(this.queryPickAPI, {
                             params: {
@@ -360,14 +370,14 @@
 
 
 
-                        Promise.all(cmtsPromises).then(results => {
-                            results.forEach((res, i) => {
-                                if (res.data.success) {
-                                    // console.log(this);
-                                    self.starpickList[i].Comments = res.data.comments;
-                                }
-                            });
-                        });
+                        // Promise.all(cmtsPromises).then(results => {
+                        //     results.forEach((res, i) => {
+                        //         if (res.data.success) {
+                        //             // console.log(this);
+                        //             self.starpickList[i].Comments = res.data.comments;
+                        //         }
+                        //     });
+                        // });
 
                         Promise.all(pickPromises).then(results => {
                             results.forEach((res, i) => {
@@ -529,7 +539,6 @@
       padding: 2px 13px;
       border-radius: 100px;
     }
-
     .pick {
       background-color: white;
     }
@@ -542,14 +551,30 @@
       background-repeat: no-repeat;
       background-position: 0px 2px;
     }
-
+    .nopick {
+        border: none;
+      /* background-color: rgb(255, 0, 128); */
+      width: 20px;
+      background-image: url(/static/like.png);
+      background-size: 25px 25px;
+      background-repeat: no-repeat;
+      background-position: 0px 2px;
+    }
     .diss {
-      background-color: lightgrey;
+      /*background-color: lightgrey;*/
     }
     .isdiss {
       border: none;
       /* background-color: grey; */
       background-image: url(/static/diss.png);
+      background-size: 33px 33px;
+      background-repeat: no-repeat;
+      background-position: -3px -5px;
+    }
+    .nodiss {
+        border: none;
+      /* background-color: grey; */
+      background-image: url(/static/diss_before.png);
       background-size: 33px 33px;
       background-repeat: no-repeat;
       background-position: -3px -5px;
